@@ -1,0 +1,4 @@
+samplename,description,batch,phenotype
+cup_tissue-ready,cup_tissue,cup,tumor
+cup_normal-ready,cup_normal,cup,normal
+
