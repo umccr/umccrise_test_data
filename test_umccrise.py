@@ -8,6 +8,7 @@ import subprocess
 
 from ngs_utils.testing import BaseTestCase, info, check_call
 from ngs_utils.utils import is_az, is_local, is_travis
+from ngs_utils.file_utils import safe_mkdir
 
 
 REUSE = False      # Run on top of existing latest results
@@ -17,9 +18,9 @@ ONLY_DIFF = False   # Do not run, just diff the latest results against the gold 
 class Test_umccrize(BaseTestCase):
     script = 'umccrise'
 
-    data_dir = join(dirname(__file__), BaseTestCase.data_dir, script)
-    results_dir = join(dirname(__file__), BaseTestCase.results_dir, script)
-    gold_standard_dir = join(dirname(__file__), BaseTestCase.gold_standard_dir, script)
+    data_dir = join(dirname(__file__), BaseTestCase.data_dir)
+    results_dir = join(dirname(__file__), BaseTestCase.results_dir)
+    gold_standard_dir = join(dirname(__file__), BaseTestCase.gold_standard_dir, 'umccrised')
 
     def setUp(self):
         # if is_local():
@@ -41,6 +42,7 @@ class Test_umccrize(BaseTestCase):
                     last_changed = datetime.fromtimestamp(getctime(results_dir))
                     prev_run = results_dir + '_' + last_changed.strftime('%Y_%m_%d_%H_%M_%S')
                     os.rename(results_dir, prev_run)
+            safe_mkdir(results_dir)
 
             cmdl = f'{self.script} {bcbio_dir} -o {results_dir}'
             if parallel:
