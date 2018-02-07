@@ -1,0 +1,30 @@
+details:
+  - analysis: variant2
+    genome_build: GRCh37
+    algorithm:
+      # Alignment parameters
+      aligner: none
+      recalibrate: false
+      realign: false
+      mark_duplicates: false
+      remove_lcr: false
+      # ad hoc downsampling. Set to 100 for challenging samples
+      maxcov_downsample: false
+
+      # Variant calling, 2-out-of-3. All callers handle InDels
+      variantcaller:
+        germline: [vardict, strelka2, gatk-haplotype]
+        somatic: [vardict, strelka2, mutect2]
+      ensemble:
+        numpass: 2
+
+      # Structural variation. No ensemble calling option here
+      svcaller: [cnvkit, manta]
+      svprioritize: cancer/az300
+
+      # Extras
+      tools_on: [gatk4, break-point-inspector]
+      tools_off: [gemini]
+      vcfanno: [gemini]
+upload:
+  dir: ../final      

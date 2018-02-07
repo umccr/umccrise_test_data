@@ -1,0 +1,364 @@
+import shutil
+shell.prefix("")
+
+import csv
+from ngs_utils.bcbio import BcbioProject
+from os.path import join, abspath, relpath, basename
+
+# count dbsnp:
+# bcftools view -H /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/mb_workflow/work/ensemble/batch1/batch1-ensemble-effects.vcf.gz | grep -P "\trs\d+" | tsv
+
+cancer_genes_ensg = '/data/cephfs/punim0010/extras/umccrise/umccrise/patient_analysis/cancer_genes_ENSG.txt'
+
+bcbio_path = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
+run = BcbioProject(bcbio_path)
+batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
+
+
+""" TODO:
+1. rsync bcbio project without VCFs and BAMs
+2. put subsetted BAMs
+3. put subsetted VCFs, cnvkit.cns and sv-prioritize.tsv
+4. what else is used?
+"""
+
+
+def extract_genes_from_vcf():
+    return 'bcftools view -h {input} > {output} && ' \
+           'bcftools view -H {input} | zgrep -f ' + cancer_genes_ensg + ' >> {output}'
+
+def vcf_to_bed():
+    return "bcftools view -H {input} | py -x \"'\\t'.join([x.split()[0], str(int(x.split()[1])-1), x.split()[1]])\"" \
+            " > {output}"
+
+def downsample_vcf(num):
+    return 'bcftools view -h {input} > {output} && ' \
+           'bcftools view -H {input} -f.,PASS | sort -R | head -n' + str(num) + '' \
+          ' | sort -k1,1 -k2,2n >> {output}'
+
+bcbio_copy_path = 'bcbio_test_project'
+
+
+rule all:
+    input:
+        bcbio_copy_path,
+        expand('work_snake/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
+        expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
+        'work_snake/roi.bed',
+        expand('bcbio_test_project/.populated_{batch}.done', batch=batch_by_name.keys()),
+
+
+######################################
+#### SOMATIC ####
+rule downsample_somatic:
+    input:
+        lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].name}-ensemble-annotated.vcf.gz')
+    output:
+        'work_snake/{batch}-ensemble.vcf'
+    shell:
+        extract_genes_from_vcf()
+
+rule somatic_roi:
+    input:
+        rules.downsample_somatic.output[0]
+    output:
+        'work_snake/{batch}-ensemble.bed'
+    shell:
+        vcf_to_bed()
+
+######################################
+#### GERMLINE ####
+rule downsample_germline:
+    input:
+        lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-ensemble-annotated.vcf.gz')
+    output:
+        'work_snake/{batch}-germline-ensemble.vcf'
+    shell:
+        extract_genes_from_vcf()
+
+rule downsample_germline_random100:
+    input:
+        rules.downsample_germline.output[0]
+    output:
+        'work_snake/{batch}-germline-ensemble-100.vcf'
+    shell:
+        downsample_vcf(100)
+
+rule germline_roi:
+    input:
+        rules.downsample_germline_random100.output[0]
+    output:
+        'work_snake/{batch}-germline-ensemble.bed'
+    shell:
+        vcf_to_bed()
+
+######################################
+#### CNVKIT ####
+rule downsample_cnvkit:
+    input:
+        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize-cnvkit.vcf.gz')
+    output:
+        'work_snake/{batch}-cnvkit.vcf'
+    shell:
+        downsample_vcf(10)
+
+rule cnvkit_roi:
+    input:
+        rules.downsample_cnvkit.output[0]
+    output:
+        'work_snake/{batch}-cnvkit.bed'
+    shell:
+        vcf_to_bed()
+
+rule downsample_cnvkit_cns:
+    input:
+        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-cnvkit.cns')
+    output:
+        'work_snake/{batch}-cnvkit.cns'
+    shell:
+        'cp {input} {output}'
+
+######################################
+#### MANTA ####
+rule downsample_manta:
+    input:
+        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize-manta.vcf.gz')
+    output:
+        'work_snake/{batch}-manta.vcf'
+    shell:
+        downsample_vcf(10)
+
+rule manta_roi:
+    input:
+        rules.downsample_manta.output[0]
+    output:
+        'work_snake/{batch}-manta.bed'
+    shell:
+        vcf_to_bed()
+
+rule downsample_sv_prioritize:
+    input:
+        tsv = lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize.tsv'),
+        manta_vcf = rules.downsample_manta.output[0]
+    output:
+        'work_snake/{batch}-sv-prioritize-tsv'
+    shell:
+        'head -n1 {input.tsv} > {output} && '
+        'grep -f <(cut -f2 {input.manta_vcf}) {input.tsv} >> {output}'
+
+######################################
+#### BAMS ####
+rule batch_roi:
+    input:
+        rules.somatic_roi.output[0],
+        rules.germline_roi.output[0],
+        rules.cnvkit_roi.output[0],
+        rules.manta_roi.output[0]
+    output:
+        'work_snake/{batch}-roi.bed'
+    shell:
+        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+
+# adding few chrY-unique locations to make goleft happy
+# rule sex_bed:
+#     output:
+#         'work_snake/sex.bed'
+#     run:
+#         sex_bed = 'Y\t2655029\t2655030\n' + \
+#                   'Y\t2713681\t2713682\n' + \
+#                   'Y\t6939595\t6939596\n'
+#         with open(output[0], 'w') as out:
+#             out.write(sex_bed)
+
+rule project_roi:
+    input:
+        expand(rules.batch_roi.output[0], batch=batch_by_name.keys())
+    output:
+        'work_snake/roi.bed'
+    shell:
+        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+
+rule subset_bam:
+    input:
+        bam = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).bam,
+        roi_bed = rules.project_roi.output[0]
+    output:
+        'work_snake/{batch}_{phenotype}.bam'
+    shell:
+        '~/bin/sambamba slice {input.bam} -L {input.roi_bed} | sambamba sort -o {output} /dev/stdin'
+
+rule index_bam:
+    input:
+        'work_snake/{batch}_{phenotype}.bam'
+    output:
+        'work_snake/{batch}_{phenotype}.bam.bai'
+    shell:
+        'samtools index {input}'
+
+# rule bcbio_csv:
+#     input:
+#         expand('work_snake/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
+#         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
+#         roi_bed = rules.project_roi.output[0]
+#     output:
+#         'work_snake/bcbio.csv'
+#     run:
+#         sample_dicts = []
+#         samples_added = set()
+#         for s in run.samples:
+#             if s.phenotype == 'germline':
+#                 pass
+#             elif s.name in samples_added:
+#                 pass
+#             else:
+#                 samples_added.add(s.name)
+#                 sample_dicts.append({
+#                     'samplename': s.batch.tumor.name + '_' + s.phenotype,
+#                     'description': s.name,
+#                     'batch': s.batch.name,
+#                     'phenotype': s.phenotype,
+#                     'variant_regions': abspath(input.roi_bed),
+#                 })
+#         with open(output[0], 'w') as out:
+#             writer = csv.DictWriter(out, fieldnames=sample_dicts[0].keys())
+#             writer.writeheader()
+#             for sd in sample_dicts:
+#                 writer.writerow(sd)
+#
+# rule make_bcbio_yaml:
+#     input:
+#         bams = expand('work_snake/{batch}_{phenotype}.bam', batch=batch_by_name.keys(), phenotype=['tumor', 'normal']),
+#         csv = rules.bcbio_csv.output[0],
+#         template = 'bcbio_template.yaml'
+#     output:
+#         'bcbio/config/bcbio.csv'
+#     shell:
+#         '/home/vlad/bcbio/anaconda/bin/bcbio_nextgen.py -w template {input.template} {input.csv} {input.bams}'
+#
+# rule run_bcbio:
+#     input:
+#         rules.make_bcbio_yaml.output[0]
+#     output:
+#         'bcbio/final'
+#     shell:
+#         'cp run.sh bcbio/work; cd bcbio/work; sbatch run.sh'
+
+
+rule rsync_project:
+    input:
+        project_ori_final = run.final_dir,
+        project_ori_config = run.config_dir
+    output:
+        project_copy = bcbio_copy_path
+    shell:
+        'mkdir {output.project_copy}'
+        ' && rsync -tavz {input.project_ori_config} {output.project_copy}'
+        ' && rsync -tavz'
+        ' --exclude ".snakemake/"'
+        ' --exclude "umccrised/"'
+        ' --exclude "test/"'
+        ' --include "*/"'
+        ' --include "multiqc_report.html"'
+        ' --include "multiqc_list_files.txt"'
+        ' --include "multiqc_config.yaml"'
+        ' --include "multiqc_config.yaml"'
+        ' --include "data_versions.csv"'
+        ' --include "programs.txt"'
+        ' --exclude "*"'
+        ' {input.project_ori_final} {output.project_copy}'
+
+
+rule populate_batch:
+    input:
+        somatic_vcf = rules.downsample_somatic.output[0],
+        germline_vcf = rules.downsample_germline_random100.output[0],
+        cnvkit_vcf =  rules.downsample_cnvkit.output[0],
+        cnvkit_cns =  rules.downsample_cnvkit_cns.output[0],
+        sv_prio = rules.downsample_sv_prioritize.output[0],
+        manta_vcf = rules.downsample_manta.output[0],
+        tumor_bam = 'work_snake/{batch}_tumor.bam',
+        normal_bam = 'work_snake/{batch}_normal.bam',
+        tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
+        normal_bai = 'work_snake/{batch}_normal.bam.bai'
+    output:
+        'bcbio_test_project/.populated_{batch}.done'
+    run:
+        batch = batch_by_name[wildcards.batch]
+
+        somatic_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.name}-ensemble-annotated.vcf.gz')
+        shell(f'bgzip -c {input.somatic_vcf} > {somatic_vcf} && tabix {somatic_vcf}')
+
+        germline_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.normal.name}-ensemble-annotated.vcf.gz')
+        shell(f'bgzip -c {input.germline_vcf} > {germline_vcf} && tabix {germline_vcf}')
+
+        cnvkit_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize-cnvkit.vcf.gz')
+        shell(f'bgzip -c {input.cnvkit_vcf} > {cnvkit_vcf} && tabix {cnvkit_vcf}')
+
+        cnvkit_cns = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-cnvkit.cns')
+        shell(f'cp {input.cnvkit_cns} {cnvkit_cns}')
+
+        manta_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize-manta.vcf.gz')
+        shell(f'bgzip -c {input.manta_vcf} > {manta_vcf} && tabix {manta_vcf}')
+
+        sv_prio = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize.tsv')
+        shell(f'cp {input.sv_prio} {sv_prio}')
+
+        tumor_bam_name = basename(batch.tumor.bam)
+        normal_bam_name = basename(batch.normal.bam)
+        tumor_dir = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath))
+        normal_dir = join(bcbio_copy_path, 'final', basename(batch.normal.dirpath))
+        shell(f'cp {input.tumor_bam} {tumor_dir}/{tumor_bam_name}')
+        shell(f'cp {input.tumor_bai} {tumor_dir}/{tumor_bam_name}.bai')
+        shell(f'cp {input.normal_bam} {normal_dir}/{normal_bam_name}')
+        shell(f'cp {input.normal_bai} {normal_dir}/{normal_bam_name}.bai')
+
+        shell('touch {output}')
+
+
+# rule germline_upload:
+#     input:
+#         rules.downsample_germline_random100.output
+#     output:
+#         lambda wc: join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch_by_name[wc.batch].normal.name}-ensemble-annotated.vcf.gz')
+#     shell:
+#         'bgzip -c {input} > {output} && tabix {output}'
+#
+# rule cnvkit_upload:
+#     input:
+#         rules.downsample_cnvkit.output
+#     output:
+#         lambda wc: join(bcbio_copy_path, 'final', basename(batch_by_name[wc.batch].tumor.dirpath), f'{batch_by_name[wc.batch].name}-sv-prioritize-cnvkit.vcf.gz')
+#     shell:
+#         'bgzip -c {input} > {output} && tabix {output}'
+#
+# rule manta_upload:
+#     input:
+#         rules.downsample_manta.output[0]
+#     output:
+#         lambda wc: join(bcbio_copy_path, 'final', basename(batch_by_name[wc.batch].tumor.dirpath), f'{batch_by_name[wc.batch].name}-sv-prioritize-manta.vcf.gz')
+#     shell:
+#         'bgzip -c {input} > {output} && tabix {output}'
+#
+# rule upload_bam:
+#     input:
+#         bam = rules.subset_bam.output[0],
+#         bai = rules.index_bam.output[0]
+#     output:
+#         bam = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).bam.replace(run.final_dir, join(bcbio_copy_path, 'final')),
+#         bai = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).bam.replace(run.final_dir, join(bcbio_copy_path, 'final')) + '.bai'
+#     shell:
+#         'cp {input.bam} {output.bam} && cp {input.bai} {output.bai}'
+
+
+
+
+
+#https://pbs.twimg.com/media/DVM0ROTXkAIna2y.jpg
+
+
+
+
+
+
+
+
