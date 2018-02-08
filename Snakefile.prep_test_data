@@ -116,7 +116,8 @@ rule downsample_cnvkit_cns:
     output:
         'work_snake/{batch}-cnvkit.cns'
     shell:
-        'cp {input} {output}'
+        'head -n1 {input} > {output} && '
+        'cat {input} | sort -R | head -n10 | sort -k1,1 -k2,2n >> {output}'
 
 ######################################
 #### MANTA ####
