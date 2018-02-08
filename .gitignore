@@ -93,3 +93,4 @@ ENV/
 .idea/
 
 conda/.index.json
+data/.snakemake/
