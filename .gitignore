@@ -95,5 +95,5 @@ ENV/
 conda/.index.json
 data/.snakemake/
 work_snake/
-test/
 .snakemake/
+results/
