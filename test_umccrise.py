@@ -15,7 +15,7 @@ REUSE = False      # Run on top of existing latest results
 ONLY_DIFF = False   # Do not run, just diff the latest results against the gold standard
 
 
-class Test_umccrize(BaseTestCase):
+class Test_umccrise(BaseTestCase):
     script = 'umccrise'
 
     data_dir = join(dirname(__file__), BaseTestCase.data_dir)
