@@ -17,12 +17,8 @@ run = BcbioProject(spa_bcbio_dir)
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
 
-""" TODO:
-1. rsync bcbio project without VCFs and BAMs
-2. put subsetted BAMs
-3. put subsetted VCFs, cnvkit.cns and sv-prioritize.tsv
-4. what else is used?
-"""
+PON_SAMPLE_NAME = 'MH17B001P004'
+PON_PATH = 'data/panel_of_normals'
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
@@ -50,9 +46,9 @@ rule all:
         expand(bcbio_copy_path + '/.populated_{batch}.done', batch=batch_by_name.keys()),
         az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
-        pon_vcf = 'data/panel_of_normals/vcfs/17MHP002Bld-CCR170002.vcf.gz',
-        pon_lua = 'data/panel_of_normals/code.lua',
-        pon_toml = 'data/panel_of_normals/annotate_normals_vcfanno.toml'
+        pon_vcf = PON_PATH + '/vcfs/' + PON_SAMPLE_NAME + '.vcf.gz',
+        pon_lua = PON_PATH + '/code.lua',
+        pon_toml = PON_PATH + '/annotate_normals_vcfanno.toml'
 
 
 ######################################
@@ -334,9 +330,6 @@ rule prep_ref_data:
         'cp {input.az300} {output.az300} && '
         'bedtools intersect -a {input.giab_regions} -b {input.az300} > {output.giab_regions}'
 
-
-PON_SAMPLE_NAME = 'MH17B001P004'
-PON_PATH = 'data/panel_of_normals'
 
 rule prep_pon_vcf:
     input:
