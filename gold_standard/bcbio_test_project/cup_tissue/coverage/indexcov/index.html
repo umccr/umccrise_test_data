@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+
+	<title>indexcov:indexcov</title>
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+		<style type="text/css">
+section {
+    width: 96%;
+    height: 425px;
+    margin: auto;
+    padding: 8px;
+}
+
+.help {
+	font-family: Lucida Console;
+	font-face: bold;
+	font-size: +2em;
+    padding: 2px;
+	border: 1px solid #aaa
+}
+
+
+.tt {
+	font-family: Lucida Console;
+    border: 2px solid #aaa;
+    padding: 2px;
+	height: auto;
+}
+
+.a3 {
+    width: 32%;
+    height: 380px;
+    float: left;
+    padding: 2px;
+}
+.b3 {
+    width: 32%;
+    margin-left: 32%;
+    height: 380px;
+    padding: 2px;
+}
+.c3 {
+    width: 32%;
+    margin-left: 32%;
+    height: 380px;
+    padding: 2px;
+}
+
+.one {
+    width: 48%;
+    height: 380px;
+    float: left;
+    padding: 2px;
+}
+.two {
+    width: 48%;
+    margin-left: 48%;
+    height: 380px;
+    padding: 2px;
+}
+		</style>
+
+    </head>
+    <body>
+<span class="top-help">
+This is the <a href="https://github.com/brentp/goleft/tree/master/indexcov">indexcov</a> summary page created with version 0.1.17.<br/>
+Click the <span class="help">?</span> above each plot for help describing that type of plot.
+</span>
+
+
+	<section>
+	<table style="width:100%">
+	<tr>
+	<td>
+	<span class="tt">Inferred sex</span> <a class="help" href="https://github.com/brentp/goleft/blob/master/docs/indexcov/help-sex.md" target="_blank">?</a>
+	
+	<p> Fewer than 2 sex chromosomes found; sex plot not shown.</p>
+	
+	</td>
+
+	<td>
+	
+	<span class="tt">Mapped Counts</span> <a class="help" href="https://github.com/brentp/goleft/blob/master/docs/indexcov/help-counts.md" target="_blank">?</a>
+	<canvas id="canvas-map" style="height:380px;width:380px"></canvas>
+	
+	</td>
+
+	<td>
+	<span class="tt">Bin Counts</span> <a class="help" href="https://github.com/brentp/goleft/blob/master/docs/indexcov/help-bin.md" target="_blank">?</a>
+	<canvas id="canvas-bin" style="height:380px;width:380px"></canvas>
+	</td>
+	</tr>
+	</table>
+
+
+	</section>
+	<hr>
+
+
+<section style="height:auto">
+	<div class="one" style="height:auto">
+	<span class="tt">Pedigree File</span>
+	<p>contains inferred sex, bins counts, and PCA values used to make the above plots</p>
+	<a href="indexcov-indexcov.ped">indexcov-indexcov.ped</a>
+	</div>
+
+	<div class="two" style="height:auto">
+	<span class="tt">Coverage BED File</span>
+	<p>contains scaled coverage for every sample (each column) for each 16,384 interval in the index</p>
+	<a href="indexcov-indexcov.bed.gz">indexcov-indexcov.bed.gz</a>
+	</div>
+
+</section><hr/>
+
+
+
+
+<section style="height:auto">
+
+
+	<div class="one">
+	<span class="tt">Coverage Plots</span> <a class="help" href="https://github.com/brentp/goleft/blob/master/docs/indexcov/help-depth.md#coverage" target="_blank">?</a>
+	<p>Click each plot for an interactive view.</p>
+
+	
+	
+		<p>
+		<a href="indexcov-indexcov-roc-1.html"><img src="indexcov-indexcov-roc-1.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-2.html"><img src="indexcov-indexcov-roc-2.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-3.html"><img src="indexcov-indexcov-roc-3.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-4.html"><img src="indexcov-indexcov-roc-4.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-5.html"><img src="indexcov-indexcov-roc-5.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-6.html"><img src="indexcov-indexcov-roc-6.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-7.html"><img src="indexcov-indexcov-roc-7.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-8.html"><img src="indexcov-indexcov-roc-8.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-9.html"><img src="indexcov-indexcov-roc-9.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-10.html"><img src="indexcov-indexcov-roc-10.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-11.html"><img src="indexcov-indexcov-roc-11.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-12.html"><img src="indexcov-indexcov-roc-12.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-13.html"><img src="indexcov-indexcov-roc-13.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-14.html"><img src="indexcov-indexcov-roc-14.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-15.html"><img src="indexcov-indexcov-roc-15.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-16.html"><img src="indexcov-indexcov-roc-16.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-17.html"><img src="indexcov-indexcov-roc-17.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-19.html"><img src="indexcov-indexcov-roc-19.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-20.html"><img src="indexcov-indexcov-roc-20.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-21.html"><img src="indexcov-indexcov-roc-21.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-22.html"><img src="indexcov-indexcov-roc-22.png" /></a>
+		</p>
+	
+		<p>
+		<a href="indexcov-indexcov-roc-X.html"><img src="indexcov-indexcov-roc-X.png" /></a>
+		</p>
+	
+
+<hr/>
+<h5>Acknowledgements</h5>
+<ul>
+	<li>created with <a href="https://github.com/brentp/goleft">goleft indexcov (version 0.1.17)</a> in <a href="https://golang.org">the go programming language</a></li>
+	<li>bam index parsing with <a href="https://github.com/biogo/hts">biogo/hts</a></li>
+	<li>interactive plots use <a href="http://www.chartjs.org/">chartjs(2)</a> via <a href="https://github.com/brentp/go-chartjs">go-chartjs</a></li>
+	<li>static plots and PCA by <a href="https://github.com/gonum/plot">gonum/plot</a>and <a href="https://github.com/gonum/matrix">gonum/matrix</a></li>
+</ul>
+
+	</div>
+	<div class="two">
+	<span class="tt">Depth Plots</span> <a class="help" href="https://github.com/brentp/goleft/blob/master/docs/indexcov/help-depth.md" target="_blank">?</a>
+	<p>
+	 Click each plot for an interactive view. 
+	</p>
+
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-1.html"><img src="indexcov-indexcov-depth-1.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-2.html"><img src="indexcov-indexcov-depth-2.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-3.html"><img src="indexcov-indexcov-depth-3.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-4.html"><img src="indexcov-indexcov-depth-4.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-5.html"><img src="indexcov-indexcov-depth-5.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-6.html"><img src="indexcov-indexcov-depth-6.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-7.html"><img src="indexcov-indexcov-depth-7.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-8.html"><img src="indexcov-indexcov-depth-8.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-9.html"><img src="indexcov-indexcov-depth-9.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-10.html"><img src="indexcov-indexcov-depth-10.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-11.html"><img src="indexcov-indexcov-depth-11.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-12.html"><img src="indexcov-indexcov-depth-12.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-13.html"><img src="indexcov-indexcov-depth-13.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-14.html"><img src="indexcov-indexcov-depth-14.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-15.html"><img src="indexcov-indexcov-depth-15.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-16.html"><img src="indexcov-indexcov-depth-16.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-17.html"><img src="indexcov-indexcov-depth-17.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-19.html"><img src="indexcov-indexcov-depth-19.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-20.html"><img src="indexcov-indexcov-depth-20.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-21.html"><img src="indexcov-indexcov-depth-21.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-22.html"><img src="indexcov-indexcov-depth-22.png" /></a>
+
+
+		</p>
+	
+		<p>
+
+		<a href="indexcov-indexcov-depth-X.html"><img src="indexcov-indexcov-depth-X.png" /></a>
+
+
+		</p>
+	
+	</div>
+
+
+    </body>
+    <script>
+	Chart.defaults.line.cubicInterpolationMode = 'monotone';
+	Chart.defaults.global.animation.duration = 0;
+
+    
+    
+
+
+
+
+    
+	var map_ctx = document.getElementById("canvas-map").getContext("2d");
+	var map_chart = new Chart(map_ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(110, 250, 59, 0.941)","borderColor":"rgba(150, 150, 150, 0.588)","borderWidth":0,"label":"samples","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(110, 250, 59, 0.941)","pointBorderWidth":0,"pointRadius":4,"pointHitRadius":6,"pointHoverRadius":6,"pointHoverBorderWidth":0,"showLine":false,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":10.67,"y":0.00}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"log(mapped reads)","fontSize":16},"ticks":{}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"log(unmapped reads)","fontSize":16},"ticks":{}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
+	var chart = map_chart;
+	
+	chart.options.hover.mode = 'index'
+	chart.options.tooltips.callbacks.title = function(tts, data) {
+		var names = [["cup_tissue"]]
+		var out = []
+		tts.forEach(function(ti) {
+			out.push(names[ti.datasetIndex][ti.index])
+		})
+		return out.join(",")
+	}
+
+
+    
+	var bin_ctx = document.getElementById("canvas-bin").getContext("2d");
+	var bin_chart = new Chart(bin_ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(110, 250, 59, 0.941)","borderColor":"rgba(150, 150, 150, 0.588)","borderWidth":0,"label":"samples","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(110, 250, 59, 0.941)","pointBorderWidth":0,"pointRadius":4,"pointHitRadius":6,"pointHoverRadius":6,"pointHoverBorderWidth":0,"showLine":false,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":0.99918,"y":1.000}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"proportion of bins with depth \u003c 0.15","fontSize":16},"ticks":{"min":0.9991777849942307,"max":0.9991777849942307}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"proportion of bins with depth outside of (0.85, 1.15)","fontSize":16},"ticks":{"min":0.000001}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
+	var chart = bin_chart
+	
+    bin_chart.options.tooltips.callbacks.title = function(tts, data) {
+        var names = ["cup_tissue"]
+        var out = []
+        tts.forEach(function(ti) {
+            out.push(names[ti.index])
+        })
+        return out.join(",")
+    }
+
+    
+	var pca_ctx = document.getElementById("canvas-pca").getContext("2d");
+	var pca_chart = new Chart(pca_ctx, "");
+	var chart = pca_chart
+	
+
+    
+	var pcb_ctx = document.getElementById("canvas-pcb").getContext("2d");
+	var pcb_chart = new Chart(pcb_ctx, "");
+	var chart = pcb_chart
+	
+
+    </script>
+</html>

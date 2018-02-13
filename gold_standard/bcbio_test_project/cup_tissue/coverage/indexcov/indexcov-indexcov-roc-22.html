@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+		<script>
+		""
+		</script>
+    </head>
+    <body>
+	
+	
+	
+	<canvas id="canvas0" style="height:550px;width:650px"></canvas>
+		<hr>
+	
+	<a href="index.html">back to index</a>
+    </body>
+    <script>
+	Chart.defaults.line.cubicInterpolationMode = 'monotone';
+	Chart.defaults.global.animation.duration = 0;
+	var charts = []
+	
+		var ctx = document.getElementById("canvas0").getContext("2d");
+		var chart = new Chart(ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(250, 18, 249, 0.941)","borderColor":"rgba(250, 18, 249, 0.941)","borderWidth":2,"label":"cup_tissue","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(250, 18, 249, 0.941)","pointBorderWidth":0,"pointRadius":0,"pointHitRadius":8,"pointHoverRadius":3,"pointHoverBorderWidth":0,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":0.00,"y":1.00},{"x":0.02,"y":0.00},{"x":0.04,"y":0.00},{"x":0.06,"y":0.00},{"x":0.09,"y":0.00},{"x":0.11,"y":0.00},{"x":0.13,"y":0.00},{"x":0.15,"y":0.00},{"x":0.17,"y":0.00},{"x":0.19,"y":0.00},{"x":0.21,"y":0.00},{"x":0.24,"y":0.00},{"x":0.26,"y":0.00},{"x":0.28,"y":0.00},{"x":0.30,"y":0.00},{"x":0.32,"y":0.00},{"x":0.34,"y":0.00},{"x":0.36,"y":0.00},{"x":0.39,"y":0.00},{"x":0.41,"y":0.00},{"x":0.43,"y":0.00},{"x":0.45,"y":0.00},{"x":0.47,"y":0.00},{"x":0.49,"y":0.00},{"x":0.51,"y":0.00},{"x":0.54,"y":0.00},{"x":0.56,"y":0.00},{"x":0.58,"y":0.00},{"x":0.60,"y":0.00},{"x":0.62,"y":0.00},{"x":0.64,"y":0.00},{"x":0.66,"y":0.00},{"x":0.69,"y":0.00},{"x":0.71,"y":0.00},{"x":0.73,"y":0.00},{"x":0.75,"y":0.00},{"x":0.77,"y":0.00},{"x":0.79,"y":0.00},{"x":0.81,"y":0.00},{"x":0.84,"y":0.00},{"x":0.86,"y":0.00},{"x":0.88,"y":0.00},{"x":0.90,"y":0.00},{"x":0.92,"y":0.00},{"x":0.94,"y":0.00},{"x":0.96,"y":0.00},{"x":0.99,"y":0.00},{"x":1.01,"y":0.00},{"x":1.03,"y":0.00},{"x":1.05,"y":0.00},{"x":1.07,"y":0.00},{"x":1.09,"y":0.00},{"x":1.11,"y":0.00},{"x":1.14,"y":0.00},{"x":1.16,"y":0.00},{"x":1.18,"y":0.00},{"x":1.20,"y":0.00},{"x":1.22,"y":0.00},{"x":1.24,"y":0.00},{"x":1.26,"y":0.00},{"x":1.29,"y":0.00},{"x":1.31,"y":0.00},{"x":1.33,"y":0.00},{"x":1.35,"y":0.00},{"x":1.37,"y":0.00},{"x":1.39,"y":0.00},{"x":1.41,"y":0.00},{"x":1.44,"y":0.00},{"x":1.46,"y":0.00},{"x":1.48,"y":0.00}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"scaled coverage for 22","fontSize":16},"ticks":{"max":1.5}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"proportion of regions covered","fontSize":16}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
+		charts.push(chart)
+	
+	
+    </script>
+</html>
