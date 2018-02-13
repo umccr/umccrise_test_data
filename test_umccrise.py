@@ -11,8 +11,14 @@ from ngs_utils.utils import is_az, is_local, is_travis
 from ngs_utils.file_utils import safe_mkdir
 
 
-REUSE = False      # Run on top of existing latest results
-ONLY_DIFF = False   # Do not run, just diff the latest results against the gold standard
+# Run on top of existing latest results
+REUSE = False
+# Do not run, just diff the latest results against the gold standard
+ONLY_DIFF = False
+
+
+BATCHES = ['cup_tissue']
+PROJECT = 'cup_sc932'
 
 
 class Test_umccrise(BaseTestCase):
@@ -20,13 +26,9 @@ class Test_umccrise(BaseTestCase):
 
     data_dir = join(dirname(__file__), BaseTestCase.data_dir)
     results_dir = join(dirname(__file__), BaseTestCase.results_dir)
-    gold_standard_dir = join(dirname(__file__), BaseTestCase.gold_standard_dir, 'umccrised')
+    gold_standard_dir = join(dirname(__file__), BaseTestCase.gold_standard_dir)
 
     def setUp(self):
-        # if is_local():
-        #     info('Running locally: setting up PATH')
-        #     os.environ['PATH'] = '/Users/vlad/miniconda3/envs/ngs_reporting/bin:' + expanduser('~/bin') + ':/usr/local/bin:/usr/bin:/bin:/usr/sbin:' + os.environ['PATH']
-        #     info('PATH = ' + os.environ['PATH'])
         BaseTestCase.setUp(self)
 
     def _run_umccrise(self, bcbio_dirname, parallel=False):
@@ -72,72 +74,52 @@ class Test_umccrise(BaseTestCase):
             return True
         return diff_failed
 
-    # def _check_var_in_datestamp(self, failed, datestamp_dir, caller):
-    #     failed = self._check_file(failed, join(datestamp_dir, caller + '.PASS.txt'))
-    #     failed = self._check_file(failed, join(datestamp_dir, 'var', caller + '.PASS.txt'))
-    #     failed = self._check_file(failed, join(datestamp_dir, 'var', caller + '.txt'))
-    #     failed = self._check_file(failed, join(datestamp_dir, 'var', caller + '.REJECT.txt'))
-    #     failed = self._check_file(failed, join(datestamp_dir, 'var', caller + '.PASS.json'))
-    #     if caller != 'freebayes':  # cannot merge using `bcftools merge`: > Incorrect number of AD fields (3) at chr21:11049225, cannot merge.
-    #         failed = self._check_file(failed, join(datestamp_dir, 'var', caller + '.vcf.gz'), vcf_ignore_lines)
-    #     return failed
-    #
-    # def _check_var_in_sample(self, failed, sample_dir, sample, caller):
-    #     failed = self._check_file(failed, join(sample_dir, 'varAnnotate', sample + '-' + caller + '.anno.vcf.gz'), vcf_ignore_lines)
-    #     failed = self._check_file(failed, join(sample_dir, 'varFilter', sample + '-' + caller + '.anno.filt.vcf.gz'), vcf_ignore_lines)
-    #     failed = self._check_file(failed, join(sample_dir, 'varFilter', sample + '-' + caller + '.anno.filt.PASS.vcf.gz'), vcf_ignore_lines)
-    #     failed = self._check_file(failed, join(sample_dir, 'varFilter', caller + '.PASS.json'), check_diff=False)
-    #     failed = self._check_file(failed, join(sample_dir, 'varFilter', caller + '.PASS.txt'))
-    #     failed = self._check_file(failed, join(sample_dir, 'varFilter', caller + '.txt'))
-    #     failed = self._check_file(failed, join(sample_dir, 'varFilter', caller + '.REJECT.txt'))
-    #     return failed
-
     def test_one(self):
         results_dir, ran_with_error = self._run_umccrise(bcbio_dirname="bcbio_test_project", parallel=False)
 
-        # datestamp_name = '2014-08-13_' + name  # TODO: change after run is finished
-        # datestamp_dir = join(bcbio_proj_dir, 'final', datestamp_name)
-
         failed = False
-        # failed = self._check_file(failed, join(bcbio_proj_dir, 'config', 'run_info_ExomeSeq.yaml'))
-        # failed = self._check_file(failed, join(datestamp_dir, 'NGv3.chr21.4col.clean.sorted.bed'))
-        # failed = self._check_file(failed, join(datestamp_dir, 'report.html'), check_diff=False)
-        # failed = self._check_file(failed, join(datestamp_dir, 'reports', 'call_vis.html'), wrapper=html_wrapper, check_diff=False)
-        # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'seq2c.tsv'), wrapper=['sort'])
-        # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'seq2c.filt.tsv'), wrapper=['sort'])
-        # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'seq2c-coverage.tsv'), wrapper=['sort'])
-        # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'cnvkit.tsv'), wrapper=['sort'])
-        # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'cnvkit.filt.tsv'), wrapper=['sort'])
-        # for caller, samples in callers.items():
-        #     if all(s.endswith('-germline') for s in samples):
-        #         failed = self._check_var_in_datestamp(failed, datestamp_dir, caller + '-germline')
-        #     else:
-        #         failed = self._check_var_in_datestamp(failed, datestamp_dir, caller)
-        #     for sample in samples:
-        #         failed = self._check_file(failed, join(datestamp_dir, 'reports', sample + '.html'), wrapper=html_wrapper, check_diff=False)
-        #         sample_dir = join(bcbio_proj_dir, 'final', sample)
-        #         failed = self._check_var_in_sample(failed, sample_dir, sample, caller)
+        failed = self._check_file(failed, f'{results_dir}/log/config/{PROJECT}-template.yaml'                                      )
+        failed = self._check_file(failed, f'{results_dir}/log/config/{PROJECT}.csv'                                                )
+        failed = self._check_file(failed, f'{results_dir}/log/config/{PROJECT}.yaml'                                               )
+        failed = self._check_file(failed, f'{results_dir}/log/data_versions.csv'                                                   )
+        failed = self._check_file(failed, f'{results_dir}/log/programs.txt'                                                        )
+        failed = self._check_file(failed, f'{results_dir}/multiqc_report.html'                                                     )
+        for batch in BATCHES:
+            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/indexcov/index.html'                                )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/normal.callable.bed'                                )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/normal.depth.bed'                                   )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/tumor.depth.bed'                                    )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/normal_mini.bam'                                         )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/normal_mini.bam.bai'                                     )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/tumor_mini.bam'                                          )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/tumor_mini.bam.bai'                                      )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/pcgr/cup_tissue-*-germline.tar.gz'                          , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/pcgr/cup_tissue-*-somatic.tar.gz'                           , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/rmd_report.html'                                            , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/work/{batch}/rmd/afs/af_tumor.txt'                                   )
+            failed = self._check_file(failed, f'{results_dir}/work/{batch}/rmd/afs/af_tumor_az300.txt'                             )
+            failed = self._check_file(failed, f'{results_dir}/work/{batch}/rmd/ensemble-hg19.vcf'                                 , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/germline-ensemble-cancer_genes.vcf.gz'       , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/germline-ensemble-cancer_genes.vcf.gz.tbi'   , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/somatic-ensemble-pon_softfiltered.vcf.gz'    , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/somatic-ensemble-pon_softfiltered.vcf.gz.tbi', check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/somatic-ensemble-pon_hardfiltered.vcf.gz'    , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/somatic-ensemble-pon_hardfiltered.vcf.gz.tbi', check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/cnvkit-diagram.pdf'                              , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/work/{batch}/structural/cnvkit-nolabels.cns'                         )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/sv-prioritize-manta-pass.bedpe'                   )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/sv-prioritize-manta-pass.ribbon.bed'              )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/sv-prioritize-manta-pass.tsv'                     )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/sv-prioritize-manta-pass.vcf'                    , vcf_ignore_lines)
 
         assert not ran_with_error, 'umccrise finished with error'
         assert not failed, 'some of file checks have failed'
 
-        # if exists(join(bcbio_proj_dir, 'work')):
-        #     shutil.rmtree(join(bcbio_proj_dir, 'work'))
+        # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'cnvkit.filt.tsv'), wrapper=['sort'])
 
-
-# Find and parse all elements containing json data, put data into a list and dumps the result.
-# The resulting text is unique per json data, so we can run simple `diff` on them.
-html_wrapper = [
-    'grep', '-A1', '<div id=".*_json">', '|', 'grep', '-v', '<div id=".*_json">', '|',
-    'python', '-c',
-        'import sys, json; '
-        'sys.stdout.write(json.dumps([json.loads(el) for el in sys.stdin.read().split(\'--\')], '
-                                     'indent=2, sort_keys=True))'
-]
 
 vcf_ignore_lines = [
-    'bcftools_annotateVersion',
-    'bcftools_annotateCommand',
+    '^##bcftools_',
     '^##INFO=',
     '^##FILTER=',
     '^##contig=',
