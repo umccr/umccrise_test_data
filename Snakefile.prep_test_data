@@ -1,33 +1,32 @@
 import shutil
-shell.prefix("")
-
 import csv
 from ngs_utils.bcbio import BcbioProject
 from os.path import join, abspath, relpath, basename
+from glob import glob
+from ngs_utils.file_utils import splitext_plus
 
-# count dbsnp:
-# bcftools view -H /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/mb_workflow/work/ensemble/batch1/batch1-ensemble-effects.vcf.gz | grep -P "\trs\d+" | tsv
+shell.prefix('')  # Fixes Snakemake on Spartan
 
-spa_hsapiens_dir = '/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens'
-spa_pon_dir = '/data/cephfs/punim0010/extras/panel_of_normals'
-spa_cancer_genes_ensg = '/data/cephfs/punim0010/extras/umccrise/umccrise/patient_analysis/cancer_genes_ENSG.txt'
 
-spa_bcbio_dir = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
-run = BcbioProject(spa_bcbio_dir)
+Spa_HSAPIENS_DIR = '/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens'
+Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
+Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/patient_analysis/cancer_genes_ENSG.txt'
+
+Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
+run = BcbioProject(Spa_BCBIO_DIR)
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
 
-PON_SAMPLE_NAME = 'MH17B001P004'
-PON_PATH = 'data/panel_of_normals'
+Out_PON_PATH = 'data/panel_of_normals'
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
-    return 'bcftools view -h ' + inp + ' > ' + out + ' && ' \
-           'bcftools view -H ' + inp + ' | zgrep -f ' + spa_cancer_genes_ensg + ' >> ' + out
+    return f'bcftools view -h {inp} > {out} && ' \
+           f'bcftools view -H {inp} | zgrep -f {Spa_CANCER_GENES_ENSG} >> {out}'
 
 def vcf_to_bed():
     return "bcftools view -H {input} | py -x \"'\\t'.join([x.split()[0], str(int(x.split()[1])-1), x.split()[1]])\"" \
-            " > {output}"
+           " > {output}"
 
 def downsample_vcf(num, inp='{input}', out='{output}'):
     return 'bcftools view -h ' + inp + ' > ' + out + ' && ' \
@@ -43,12 +42,10 @@ rule all:
         expand('work_snake/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
-        expand(bcbio_copy_path + '/.populated_{batch}.done', batch=batch_by_name.keys()),
+        expand(join(bcbio_copy_path, '.populated_{batch}.done'), batch=batch_by_name.keys()),
         az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
-        pon_vcf = PON_PATH + '/vcfs/' + PON_SAMPLE_NAME + '.vcf.gz',
-        pon_lua = PON_PATH + '/code.lua',
-        pon_toml = PON_PATH + '/annotate_normals_vcfanno.toml'
+        pon_vcf = join(Out_PON_PATH, 'panel_of_normals.vcf.gz')
 
 
 ######################################
@@ -255,8 +252,7 @@ rule rsync_project:
     output:
         project_copy = bcbio_copy_path
     shell:
-        'mkdir {output.project_copy}'
-        ' && rsync -tavz {input.project_ori_config} {output.project_copy}'
+        'rsync -tavz {input.project_ori_config} {output.project_copy}'
         ' && rsync -tavz'
         ' --exclude ".snakemake/"'
         ' --exclude "umccrised/"'
@@ -319,10 +315,12 @@ rule populate_batch:
         shell('touch {output}')
 
 
+######################################
+#### Reference data ####
 rule prep_ref_data:
     input:
-        az300 = join(spa_hsapiens_dir, 'GRCh37/coverage/prioritize/cancer/az300.bed.gz'),
-        giab_regions = join(spa_hsapiens_dir, 'GRCh37/validation/giab-NA12878/truth_regions.bed'),
+        az300 = join(Spa_HSAPIENS_DIR, 'GRCh37/coverage/prioritize/cancer/az300.bed.gz'),
+        giab_regions = join(Spa_HSAPIENS_DIR, 'GRCh37/validation/giab-NA12878/truth_regions.bed'),
     output:
         az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed'
@@ -331,43 +329,55 @@ rule prep_ref_data:
         'bedtools intersect -a {input.giab_regions} -b {input.az300} > {output.giab_regions}'
 
 
+######################################
+#### Panel of normals ####
+rule project_somatic_roi:
+    input:
+        expand(rules.somatic_roi.output[0], batch=batch_by_name.keys())
+    output:
+        'work_snake/somatic_roi.bed'
+    shell:
+        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+
+
 rule prep_pon_vcf:
     input:
-        pon_vcf = join(spa_pon_dir, 'vcfs/' + PON_SAMPLE_NAME + '.vcf.gz')
+        pon_vcf = join(Spa_PON_DIR, 'panel_of_normals.vcf.gz'),
+        somatic_roi = rules.project_somatic_roi.output[0]
     output:
-        'work_snake/panel_of_normals/' + PON_SAMPLE_NAME + '.vcf.gz'
-    params:
-        ungz = 'work_snake/panel_of_normals/' + PON_SAMPLE_NAME + '.vcf'
+        vcf = join(Out_PON_PATH, 'panel_of_normals.vcf.gz')
     shell:
-        extract_genes_from_vcf(inp='{input}', out='{params.ungz}') + ' && bgzip {params.ungz} && tabix {output}'
-
-rule prep_pon:
-    input:
-        pon_vcf = rules.prep_pon_vcf.output[0],
-        pon_snakefile = join(spa_pon_dir, 'Snakefile.prep_normals')
-    output:
-        pon_vcf = PON_PATH + '/vcfs/' + PON_SAMPLE_NAME + '.vcf.gz',
-        pon_lua = PON_PATH + '/code.lua',
-        pon_toml = PON_PATH + '/annotate_normals_vcfanno.toml'
-    params:
-        sname = PON_SAMPLE_NAME,
-        pon = PON_PATH,
-        vcf_path = lambda wc, input: relpath(input.pon_vcf, PON_PATH)
-    shell:
-        'snakemake -p -s {input.pon_snakefile} --directory {params.pon} --config normal="{params.sname}:{params.vcf_path}"'
+        'bedtools intersect -header -a {input.pon_vcf} -b {input.somatic_roi} | ' \
+        'bgzip -c > {output.vcf} && tabix {output.vcf}'
 
 
-#https://pbs.twimg.com/media/DVM0ROTXkAIna2y.jpg
+# rule prep_pon:
+#     input:
+#         pon_vcf = rules.prep_pon_vcf.output[0],
+#         pon_snakefile = join(Spa_PON_DIR, 'Snakefile.prep_normals')
+#     output:
+#         pon_vcf = join(Out_PON_PATH, 'panel_of_normals.vcf.gz')
+#     params:
+#         pon = Out_PON_PATH,
+#         vcf_path = lambda wc, input: relpath(input.pon_vcf, Out_PON_PATH)
+#     shell:
+#         'snakemake -p -s {input.pon_snakefile} --directory {params.pon} --config normal="{params.sname}:{params.vcf_path}"'
 
 
-
-
-
-
-
-
-
-
+# rule prep_pon:
+#     input:
+#         pon_vcf = rules.prep_pon_vcf.output[0],
+#         pon_snakefile = join(Spa_PON_DIR, 'Snakefile.prep_normals')
+#     output:
+#         pon_vcf = Out_PON_PATH + '/vcfs/' + PON_SAMPLE_NAME + '.vcf.gz',
+#         pon_lua = Out_PON_PATH + '/code.lua',
+#         pon_toml = Out_PON_PATH + '/annotate_normals_vcfanno.toml'
+#     params:
+#         sname = PON_SAMPLE_NAME,
+#         pon = Out_PON_PATH,
+#         vcf_path = lambda wc, input: relpath(input.pon_vcf, Out_PON_PATH)
+#     shell:
+#         'snakemake -p -s {input.pon_snakefile} --directory {params.pon} --config normal="{params.sname}:{params.vcf_path}"'
 
 
 
