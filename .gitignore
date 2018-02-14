@@ -96,3 +96,4 @@ conda/.index.json
 work_snake/
 results/
 .snakemake
+data.bak/
