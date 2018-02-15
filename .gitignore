@@ -97,3 +97,4 @@ work_snake/
 results/
 .snakemake
 data.bak/
+data/genomes/Hsapiens/GRCh37/seq
