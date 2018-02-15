@@ -21,6 +21,9 @@ batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is
 Out_PON_PATH = 'data/panel_of_normals'
 
 
+SORT_SEED = "--random-source <(echo aaaaaaaaaaaaaaa)"
+
+
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
     return f'bcftools view -h {inp} > {out} && ' \
            f'bcftools view -H {inp} | zgrep -f {Spa_CANCER_GENES_ENSG} >> {out}'
@@ -31,7 +34,7 @@ def vcf_to_bed():
 
 def downsample_vcf(num, inp='{input}', out='{output}'):
     return 'bcftools view -h ' + inp + ' > ' + out + ' && ' \
-           'bcftools view -H ' + inp + ' -f.,PASS | sort -R | head -n' + str(num) + '' \
+           'bcftools view -H ' + inp + ' -f.,PASS | sort -R ' + SORT_SEED + ' | head -n' + str(num) + '' \
           ' | sort -k1,1 -k2,2n >> ' + out
 
 bcbio_copy_path = 'data/bcbio_test_project'
@@ -118,7 +121,7 @@ rule downsample_cnvkit_cns:
         'work_snake/sv/{batch}-cnvkit.cns'
     shell:
         'head -n1 {input} > {output} && '
-        'cat {input} | sort -R | head -n10 | sort -k1,1 -k2,2n >> {output}'
+        'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output}'
 
 ######################################
 #### MANTA ####
@@ -318,19 +321,11 @@ rule populate_batch:
 
 ######################################
 #### Reference data ####
-rule project_germline_roi:
-    input:
-        expand(rules.germline_roi.output[0], batch=batch_by_name.keys())
-    output:
-        'work_snake/germline_roi.bed'
-    shell:
-        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
-
 rule prep_ref_data:
     input:
         az300 = join(Spa_HSAPIENS_DIR, 'GRCh37/coverage/prioritize/cancer/az300.bed.gz'),
         giab_regions = join(Spa_HSAPIENS_DIR, 'GRCh37/validation/giab-NA12878/truth_regions.bed'),
-        roi_bed = rules.project_germline_roi.output[0]
+        roi_bed = rules.project_roi.output[0]
     output:
         az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed'
