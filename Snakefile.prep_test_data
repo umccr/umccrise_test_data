@@ -11,6 +11,7 @@ shell.prefix('')  # Fixes Snakemake on Spartan
 Spa_HSAPIENS_DIR = '/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens'
 Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
 Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/patient_analysis/cancer_genes_ENSG.txt'
+# TODO: compare ENSG and az300
 
 Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
 run = BcbioProject(Spa_BCBIO_DIR)
@@ -54,7 +55,7 @@ rule downsample_somatic:
     input:
         lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].name}-ensemble-annotated.vcf.gz')
     output:
-        'work_snake/{batch}-ensemble.vcf'
+        'work_snake/somatic/{batch}-ensemble.vcf'
     shell:
         extract_genes_from_vcf()
 
@@ -62,7 +63,7 @@ rule somatic_roi:
     input:
         rules.downsample_somatic.output[0]
     output:
-        'work_snake/{batch}-ensemble.bed'
+        'work_snake/somatic/{batch}-ensemble.bed'
     shell:
         vcf_to_bed()
 
@@ -72,7 +73,7 @@ rule downsample_germline:
     input:
         lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-ensemble-annotated.vcf.gz')
     output:
-        'work_snake/{batch}-germline-ensemble.vcf'
+        'work_snake/germline/{batch}-germline-ensemble.vcf'
     shell:
         extract_genes_from_vcf()
 
@@ -80,7 +81,7 @@ rule downsample_germline_random100:
     input:
         rules.downsample_germline.output[0]
     output:
-        'work_snake/{batch}-germline-ensemble-100.vcf'
+        'work_snake/germline/{batch}-germline-ensemble-100.vcf'
     shell:
         downsample_vcf(100)
 
@@ -88,7 +89,7 @@ rule germline_roi:
     input:
         rules.downsample_germline_random100.output[0]
     output:
-        'work_snake/{batch}-germline-ensemble.bed'
+        'work_snake/germline/{batch}-germline-ensemble.bed'
     shell:
         vcf_to_bed()
 
@@ -98,7 +99,7 @@ rule downsample_cnvkit:
     input:
         lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize-cnvkit.vcf.gz')
     output:
-        'work_snake/{batch}-cnvkit.vcf'
+        'work_snake/sv/{batch}-cnvkit.vcf'
     shell:
         downsample_vcf(10)
 
@@ -106,7 +107,7 @@ rule cnvkit_roi:
     input:
         rules.downsample_cnvkit.output[0]
     output:
-        'work_snake/{batch}-cnvkit.bed'
+        'work_snake/sv/{batch}-cnvkit.bed'
     shell:
         vcf_to_bed()
 
@@ -114,7 +115,7 @@ rule downsample_cnvkit_cns:
     input:
         lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-cnvkit.cns')
     output:
-        'work_snake/{batch}-cnvkit.cns'
+        'work_snake/sv/{batch}-cnvkit.cns'
     shell:
         'head -n1 {input} > {output} && '
         'cat {input} | sort -R | head -n10 | sort -k1,1 -k2,2n >> {output}'
@@ -125,7 +126,7 @@ rule downsample_manta:
     input:
         lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize-manta.vcf.gz')
     output:
-        'work_snake/{batch}-manta.vcf'
+        'work_snake/sv/{batch}-manta.vcf'
     shell:
         downsample_vcf(10)
 
@@ -133,7 +134,7 @@ rule manta_roi:
     input:
         rules.downsample_manta.output[0]
     output:
-        'work_snake/{batch}-manta.bed'
+        'work_snake/sv/{batch}-manta.bed'
     shell:
         vcf_to_bed()
 
@@ -142,7 +143,7 @@ rule downsample_sv_prioritize:
         tsv = lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize.tsv'),
         manta_vcf = rules.downsample_manta.output[0]
     output:
-        'work_snake/{batch}-sv-prioritize-tsv'
+        'work_snake/sv/{batch}-sv-prioritize-tsv'
     shell:
         'head -n1 {input.tsv} > {output} && '
         'grep -f <(cut -f2 {input.manta_vcf}) {input.tsv} >> {output}'
@@ -317,16 +318,25 @@ rule populate_batch:
 
 ######################################
 #### Reference data ####
+rule project_germline_roi:
+    input:
+        expand(rules.germline_roi.output[0], batch=batch_by_name.keys())
+    output:
+        'work_snake/germline_roi.bed'
+    shell:
+        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+
 rule prep_ref_data:
     input:
         az300 = join(Spa_HSAPIENS_DIR, 'GRCh37/coverage/prioritize/cancer/az300.bed.gz'),
         giab_regions = join(Spa_HSAPIENS_DIR, 'GRCh37/validation/giab-NA12878/truth_regions.bed'),
+        roi_bed = rules.project_germline_roi.output[0]
     output:
         az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed'
     shell:
         'cp {input.az300} {output.az300} && '
-        'bedtools intersect -a {input.giab_regions} -b {input.az300} > {output.giab_regions}'
+        'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output.giab_regions}'
 
 
 ######################################
@@ -338,7 +348,6 @@ rule project_somatic_roi:
         'work_snake/somatic_roi.bed'
     shell:
         'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
-
 
 rule prep_pon_vcf:
     input:
