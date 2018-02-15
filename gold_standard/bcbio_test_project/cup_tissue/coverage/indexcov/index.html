@@ -211,10 +211,6 @@ Click the <span class="help">?</span> above each plot for help describing that t
 		<a href="indexcov-indexcov-roc-X.html"><img src="indexcov-indexcov-roc-X.png" /></a>
 		</p>
 	
-		<p>
-		<a href="indexcov-indexcov-roc-Y.html"><img src="indexcov-indexcov-roc-Y.png" /></a>
-		</p>
-	
 
 <hr/>
 <h5>Acknowledgements</h5>
@@ -380,13 +376,6 @@ Click the <span class="help">?</span> above each plot for help describing that t
 
 		</p>
 	
-		<p>
-
-		<a href="indexcov-indexcov-depth-Y.html"><img src="indexcov-indexcov-depth-Y.png" /></a>
-
-
-		</p>
-	
 	</div>
 
 
@@ -403,7 +392,7 @@ Click the <span class="help">?</span> above each plot for help describing that t
 
     
 	var map_ctx = document.getElementById("canvas-map").getContext("2d");
-	var map_chart = new Chart(map_ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(110, 250, 59, 0.941)","borderColor":"rgba(150, 150, 150, 0.588)","borderWidth":0,"label":"samples","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(110, 250, 59, 0.941)","pointBorderWidth":0,"pointRadius":4,"pointHitRadius":6,"pointHoverRadius":6,"pointHoverBorderWidth":0,"showLine":false,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":10.75,"y":1.61}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"log(mapped reads)","fontSize":16},"ticks":{}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"log(unmapped reads)","fontSize":16},"ticks":{}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
+	var map_chart = new Chart(map_ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(110, 250, 59, 0.941)","borderColor":"rgba(150, 150, 150, 0.588)","borderWidth":0,"label":"samples","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(110, 250, 59, 0.941)","pointBorderWidth":0,"pointRadius":4,"pointHitRadius":6,"pointHoverRadius":6,"pointHoverBorderWidth":0,"showLine":false,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":10.76,"y":0.69}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"log(mapped reads)","fontSize":16},"ticks":{}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"log(unmapped reads)","fontSize":16},"ticks":{}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
 	var chart = map_chart;
 	
 	chart.options.hover.mode = 'index'
@@ -419,7 +408,7 @@ Click the <span class="help">?</span> above each plot for help describing that t
 
     
 	var bin_ctx = document.getElementById("canvas-bin").getContext("2d");
-	var bin_chart = new Chart(bin_ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(110, 250, 59, 0.941)","borderColor":"rgba(150, 150, 150, 0.588)","borderWidth":0,"label":"samples","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(110, 250, 59, 0.941)","pointBorderWidth":0,"pointRadius":4,"pointHitRadius":6,"pointHoverRadius":6,"pointHoverBorderWidth":0,"showLine":false,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":0.99917,"y":1.000}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"proportion of bins with depth \u003c 0.15","fontSize":16},"ticks":{"min":0.9991684248867752,"max":0.9991684248867752}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"proportion of bins with depth outside of (0.85, 1.15)","fontSize":16},"ticks":{"min":0.000001}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
+	var bin_chart = new Chart(bin_ctx, {"type":"line","data":{"datasets":[{"backgroundColor":"rgba(110, 250, 59, 0.941)","borderColor":"rgba(150, 150, 150, 0.588)","borderWidth":0,"label":"samples","fill":false,"lineTension":0,"pointBackgroundColor":"rgba(110, 250, 59, 0.941)","pointBorderWidth":0,"pointRadius":4,"pointHitRadius":6,"pointHoverRadius":6,"pointHoverBorderWidth":0,"showLine":false,"xAxisID":"xaxis0","yAxisID":"yaxis0","data":[{"x":0.99913,"y":1.000}]}],"labels":null},"options":{"responsive":false,"scales":{"xAxes":[{"type":"linear","position":"bottom","id":"xaxis0","scaleLabel":{"display":true,"labelString":"proportion of bins with depth \u003c 0.15","fontSize":16},"ticks":{"min":0.9991260452498811,"max":0.9991260452498811}}],"yAxes":[{"type":"linear","position":"left","id":"yaxis0","scaleLabel":{"display":true,"labelString":"proportion of bins with depth outside of (0.85, 1.15)","fontSize":16},"ticks":{"min":0.000001}}]},"legend":{"display":false},"tooltips":{"mode":"nearest"}}});
 	var chart = bin_chart
 	
     bin_chart.options.tooltips.callbacks.title = function(tts, data) {
