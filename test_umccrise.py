@@ -14,7 +14,7 @@ from ngs_utils.file_utils import safe_mkdir
 # Run on top of existing latest results
 REUSE = False
 # Do not run, just diff the latest results against the gold standard
-ONLY_DIFF = True
+ONLY_DIFF = False
 
 
 BATCHES = ['cup_tissue']
