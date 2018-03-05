@@ -6,15 +6,9 @@ from datetime import datetime
 import shutil
 import subprocess
 
-from ngs_utils.testing import BaseTestCase, info, check_call
+from ngs_utils.testing import BaseTestCase, info, check_call, vcf_ignore_lines, swap_output
 from ngs_utils.utils import is_az, is_local, is_travis
 from ngs_utils.file_utils import safe_mkdir
-
-
-# Run on top of existing latest results
-REUSE = False
-# Do not run, just diff the latest results against the gold standard
-ONLY_DIFF = False
 
 
 BATCHES = ['cup_tissue']
@@ -33,35 +27,12 @@ class Test_umccrise(BaseTestCase):
 
     def _run_umccrise(self, bcbio_dirname, parallel=False):
         results_dir = join(self.results_dir, bcbio_dirname)
-        ran_with_error = False
-
-        if not ONLY_DIFF:
-            bcbio_dir = join(self.data_dir, bcbio_dirname)
-            assert isdir(bcbio_dir), f'Data directory {bcbio_dir} not found'
-
-            if not REUSE:
-                if exists(results_dir):
-                    last_changed = datetime.fromtimestamp(getctime(results_dir))
-                    prev_run = results_dir + '_' + last_changed.strftime('%Y_%m_%d_%H_%M_%S')
-                    os.rename(results_dir, prev_run)
-            safe_mkdir(results_dir)
-
-            cmdl = f'{self.script} {bcbio_dir} -o {results_dir}'
-            if parallel:
-                cmdl += ' -j 10'
-
-            ran_with_error = False
-            info('-' * 100)
-            try:
-                check_call(cmdl)
-            except subprocess.CalledProcessError:
-                sys.stderr.write(f'{self.script} finished with error:\n')
-                sys.stderr.write(f'{traceback.format_exc()}\n')
-                ran_with_error = True
-            info('-' * 100)
-            info('')
-
-        return results_dir, ran_with_error
+        bcbio_dir = join(self.data_dir, bcbio_dirname)
+        cmdl = f'{self.script} {bcbio_dir} -o {results_dir}'
+        if parallel:
+            cmdl += ' -j 10'
+        self._run_cmd(cmdl, bcbio_dir, results_dir)
+        return results_dir
 
     def _check_file(self, diff_failed, path, ignore_matching_lines=None, wrapper=None, check_diff=True):
         try:
@@ -75,7 +46,7 @@ class Test_umccrise(BaseTestCase):
         return diff_failed
 
     def test_one(self):
-        results_dir, ran_with_error = self._run_umccrise(bcbio_dirname='bcbio_test_project', parallel=False)
+        results_dir = self._run_umccrise(bcbio_dirname='bcbio_test_project', parallel=False)
 
         failed = False
         failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-config/{PROJECT}-template.yaml'                                    )
@@ -112,15 +83,6 @@ class Test_umccrise(BaseTestCase):
             failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.tsv'                     )
             failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.vcf'                    , vcf_ignore_lines)
 
-        assert not ran_with_error, 'umccrise finished with error'
         assert not failed, 'some of file checks have failed'
 
         # failed = self._check_file(failed, join(datestamp_dir, 'cnv', 'cnvkit.filt.tsv'), wrapper=['sort'])
-
-
-vcf_ignore_lines = [
-    '^##bcftools_',
-    '^##INFO=',
-    '^##FILTER=',
-    '^##contig=',
-]
