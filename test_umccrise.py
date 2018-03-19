@@ -56,7 +56,7 @@ class Test_umccrise(BaseTestCase):
         failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-programs.txt'                                                      )
         failed = self._check_file(failed, f'{results_dir}/{PROJECT}-multiqc_report.html'                                                   )
         for batch in BATCHES:
-            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-indexcov/index.html'                                )
+            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-indexcov/index.html'              , check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-normal.callable.bed'                                )
             failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-normal.depth.bed'                                   )
             failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-tumor.depth.bed'                                    )
