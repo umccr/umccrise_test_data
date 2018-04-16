@@ -10,7 +10,7 @@ shell.prefix('')  # Fixes Snakemake on Spartan
 
 Spa_HSAPIENS_DIR = '/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens'
 Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
-Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/patient_analysis/cancer_genes_ENSG.txt'
+Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/cancer_genes_ENSG.txt'
 # TODO: compare ENSG and az300
 
 Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
@@ -49,7 +49,8 @@ rule all:
         expand(join(bcbio_copy_path, '.populated_{batch}.done'), batch=batch_by_name.keys()),
         az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
-        pon_vcf = join(Out_PON_PATH, 'panel_of_normals.vcf.gz')
+        pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
+        pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
 
 
 ######################################
@@ -121,7 +122,8 @@ rule downsample_cnvkit_cns:
         'work_snake/sv/{batch}-cnvkit.cns'
     shell:
         'head -n1 {input} > {output} && '
-        'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output}'
+        'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output} && '
+        'echo "GL1231\t12\t698\tAC125634.1\t0.040144\t28.8\t16\t15.263" >> {output}'
 
 ######################################
 #### MANTA ####
@@ -344,12 +346,22 @@ rule project_somatic_roi:
     shell:
         'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
 
-rule prep_pon_vcf:
+rule prep_pon_snps_vcf:
     input:
-        pon_vcf = join(Spa_PON_DIR, 'panel_of_normals.vcf.gz'),
+        pon_vcf = join(Spa_PON_DIR, 'panel_of_normals.snps.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
-        vcf = join(Out_PON_PATH, 'panel_of_normals.vcf.gz')
+        vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz')
+    shell:
+        'bedtools intersect -header -a {input.pon_vcf} -b {input.somatic_roi} | ' \
+        'bgzip -c > {output.vcf} && tabix {output.vcf}'
+
+rule prep_pon_indels_vcf:
+    input:
+        pon_vcf = join(Spa_PON_DIR, 'panel_of_normals.indels.vcf.gz'),
+        somatic_roi = rules.project_somatic_roi.output[0]
+    output:
+        vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
     shell:
         'bedtools intersect -header -a {input.pon_vcf} -b {input.somatic_roi} | ' \
         'bgzip -c > {output.vcf} && tabix {output.vcf}'
