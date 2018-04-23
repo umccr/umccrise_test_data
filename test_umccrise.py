@@ -11,7 +11,8 @@ from ngs_utils.utils import is_az, is_local, is_travis
 from ngs_utils.file_utils import safe_mkdir
 
 
-BATCHES = ['cup_tissue']
+TUMORS = ['cup_tissue']
+BATCHES = ['cup']
 PROJECT = 'cup_sc932'
 
 
@@ -58,35 +59,35 @@ class Test_umccrise(BaseTestCase):
         failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-data_versions.csv'                                                                  )
         failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-programs.txt'                                                                       )
         failed = self._check_file(failed, f'{results_dir}/{PROJECT}-multiqc_report.html'                                                                    )
-        for batch in BATCHES:
-            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-indexcov/index.html'                               , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-normal.callable.bed'                                                 )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-normal.depth.bed'                                                    )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/coverage/{batch}-tumor.depth.bed'                                                     )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/cup_tissue-roi.bed'                                                               )
+        for T, B in zip(TUMORS, BATCHES):
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/coverage/{B}-{T}-indexcov/index.html'                               , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/coverage/{B}-{T}-normal.callable.bed'                                                 )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/coverage/{B}-{T}-normal.depth.bed'                                                    )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/coverage/{B}-{T}-tumor.depth.bed'                                                     )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/igv/{B}-{T}-roi.bed'                                                                  )
 
-            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/{batch}-normal_mini.bam'                                        , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/{batch}-normal_mini.bam.bai'                                    , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/{batch}-tumor_mini.bam'                                         , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/igv/{batch}-tumor_mini.bam.bai'                                     , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/pcgr/input/{batch}-*-normal.tar.gz'                                 , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/pcgr/input/{batch}-*-somatic.tar.gz'                                , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/{batch}-rmd_report.html'                                            , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/work/{batch}/rmd/afs/af_tumor.txt'                                                            )
-            failed = self._check_file(failed, f'{results_dir}/work/{batch}/rmd/afs/af_tumor_az300.txt'                                                      )
-            failed = self._check_file(failed, f'{results_dir}/work/{batch}/rmd/ensemble-hg19.vcf'                                         , vcf_ignore_lines)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/{batch}-normal-ensemble-cancer_genes.vcf.gz'         , vcf_ignore_lines)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/{batch}-normal-ensemble-cancer_genes.vcf.gz.tbi'     , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/{batch}-somatic-ensemble-pon_softfiltered.vcf.gz'    , vcf_ignore_lines)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/{batch}-somatic-ensemble-pon_softfiltered.vcf.gz.tbi', check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/{batch}-somatic-ensemble-pon_hardfiltered.vcf.gz'    , vcf_ignore_lines)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/small_variants/{batch}-somatic-ensemble-pon_hardfiltered.vcf.gz.tbi', check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-cnvkit-diagram.pdf'                              , check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/work/{batch}/structural/{batch}-cnvkit-nolabels.cns'                                          )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.bedpe'                                    )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.ribbon.bed'                               )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.tsv'                                      )
-            failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.vcf'                    , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/igv/{B}-{T}-normal-mini.bam'                                        , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/igv/{B}-{T}-normal-mini.bam.bai'                                    , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/igv/{B}-{T}-tumor-mini.bam'                                         , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/igv/{B}-{T}-tumor-mini.bam.bai'                                     , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/pcgr/input/{B}-{T}-normal.tar.gz'                                   , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/pcgr/input/{B}-{T}-somatic.tar.gz'                                  , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/{B}-{T}-rmd_report.html'                                            , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/work/{B}-{T}/rmd/afs/af_tumor.txt'                                                            )
+            failed = self._check_file(failed, f'{results_dir}/work/{B}-{T}/rmd/afs/af_tumor_az300.txt'                                                      )
+            failed = self._check_file(failed, f'{results_dir}/work/{B}-{T}/rmd/ensemble-hg19.vcf'                                         , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/small_variants/{B}-{T}-normal-ensemble-cancer_genes.vcf.gz'         , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/small_variants/{B}-{T}-normal-ensemble-cancer_genes.vcf.gz.tbi'     , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/small_variants/{B}-{T}-somatic-ensemble-pon_softfiltered.vcf.gz'    , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/small_variants/{B}-{T}-somatic-ensemble-pon_softfiltered.vcf.gz.tbi', check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/small_variants/{B}-{T}-somatic-ensemble-pon_hardfiltered.vcf.gz'    , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/small_variants/{B}-{T}-somatic-ensemble-pon_hardfiltered.vcf.gz.tbi', check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/work/{B}-{T}/structural/{B}-{T}-cnvkit-nolabels.cns'                                          )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/structural/{B}-{T}-cnvkit-diagram.pdf'                              , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/structural/{B}-{T}-sv-prioritize-manta-pass.bedpe'                                    )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/structural/{B}-{T}-sv-prioritize-manta-pass.ribbon.bed'                               )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/structural/{B}-{T}-sv-prioritize-manta-pass.tsv'                                      )
+            failed = self._check_file(failed, f'{results_dir}/{B}-{T}/structural/{B}-{T}-sv-prioritize-manta-pass.vcf'                    , vcf_ignore_lines)
 
         assert not failed, 'some of file checks have failed'
 
