@@ -98,3 +98,5 @@ results/
 .snakemake
 data.bak/
 data/genomes/Hsapiens/GRCh37/seq
+
+data/pcgr/
