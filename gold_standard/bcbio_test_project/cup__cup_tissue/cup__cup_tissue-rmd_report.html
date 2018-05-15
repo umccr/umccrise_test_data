@@ -11,7 +11,7 @@
 
 <meta name="author" content="Oliver Hofmann" />
 
-<meta name="date" content="2018-04-23" />
+<meta name="date" content="2018-05-15" />
 
 <title>UMCCR Patient Summary</title>
 
@@ -141,7 +141,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">UMCCR Patient Summary</h1>
 <h4 class="author"><em>Oliver Hofmann</em></h4>
-<h4 class="date"><em>2018-04-23</em></h4>
+<h4 class="date"><em>2018-05-15</em></h4>
 
 </div>
 
@@ -150,7 +150,19 @@ $(document).ready(function () {
 <h2>Allelic frequencies</h2>
 <p>Comparing the allelic frequencies of all somatic mutations vs those present in a subset of ~300 known cancer genes. Frequencies are currently based on Mutect2 calls only and limited to ‘high confidence’ regions as determined by the [Genome in a Botte consortium].</p>
 <pre class="r"><code># Global AF
-af &lt;- readr::read_tsv(params$af_freqs, col_names = &quot;af&quot;, col_types = &quot;d&quot;) %&gt;%
+print(&quot;params$af_freqs:&quot;)</code></pre>
+<pre><code>## [1] &quot;params$af_freqs:&quot;</code></pre>
+<pre class="r"><code>print(params$af_freqs)</code></pre>
+<pre><code>## [1] &quot;work/cup__cup_tissue/rmd/afs/af_tumor.txt&quot;</code></pre>
+<pre class="r"><code>print(&quot;&quot;)</code></pre>
+<pre><code>## [1] &quot;&quot;</code></pre>
+<pre class="r"><code>print(&quot;params$af_freqs_az300:&quot;)</code></pre>
+<pre><code>## [1] &quot;params$af_freqs_az300:&quot;</code></pre>
+<pre class="r"><code>print(params$af_freqs_az300)</code></pre>
+<pre><code>## [1] &quot;work/cup__cup_tissue/rmd/afs/af_tumor_az300.txt&quot;</code></pre>
+<pre class="r"><code>print(&quot;&quot;)</code></pre>
+<pre><code>## [1] &quot;&quot;</code></pre>
+<pre class="r"><code>af &lt;- readr::read_tsv(params$af_freqs, col_names = &quot;af&quot;, col_types = &quot;d&quot;) %&gt;%
   dplyr::mutate(set = &quot;wgs&quot;)
 
 # AF for AstraZeneca's AZ300 gene set
@@ -222,8 +234,8 @@ result %&gt;%
   dplyr::arrange(-Contribution) %&gt;%
   DT::datatable(rownames = FALSE) %&gt;%
   DT::formatRound('Contribution', 1)</code></pre>
-<div id="htmlwidget-4009f6d5279d2e447de7" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-4009f6d5279d2e447de7">{"x":{"filter":"none","data":[["Sig10","Sig15","Sig1","Sig7","Sig21","Sig26","Sig27"],[8.84287482432566,7.49747666830732,6.21329628335906,4.68601708569985,1.98394389186833,0.715441201360055,0.139734874061841]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Signature<\/th>\n      <th>Contribution<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data) {\nDTWidget.formatRound(this, row, data, 1, 1);\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div id="htmlwidget-ba8d29b396706123a86c" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ba8d29b396706123a86c">{"x":{"filter":"none","data":[["Sig10","Sig15","Sig1","Sig7","Sig21","Sig26","Sig27"],[8.84287482432566,7.49747666830732,6.21329628335906,4.68601708569985,1.98394389186833,0.715441201360055,0.139734874061841]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Signature<\/th>\n      <th>Contribution<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data) {\nDTWidget.formatRound(this, row, data, 1, 1);\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 <div id="check-for-positional-enrichment-of-somatic-signatures-limited-to-autosomes" class="section level3">
 <h3>Check for positional enrichment of somatic signatures (limited to autosomes):</h3>
@@ -245,8 +257,8 @@ cnv_all &lt;- readr::read_tsv(params$sv_fname, col_names = TRUE, col_types = col
   dplyr::distinct()
 
 DT::datatable(cnv_all, rownames = FALSE)</code></pre>
-<div id="htmlwidget-1033595b9ec400b6bcba" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1033595b9ec400b6bcba">{"x":{"filter":"none","data":[["3","3","3","3","3","3","3","4","4","4","4","4","4","4","4","4","4","5","5","6","9","9","11","11","11","14","14","14","14","14"],[60375800,60375800,60375800,60375800,60375800,60994227,137753286,91724483,91724483,91724483,91724483,91724483,91724483,91724483,91724483,91724483,91724483,37742075,142341354,84736590,122278193,122278193,70625753,70625753,70625753,101398467,101398467,101398467,101398467,101398467],[60529132,60529132,60529132,60529132,60529132,62155275,null,91847830,91847830,91847830,91847830,91847830,91847830,91847830,91847830,91847830,91847830,37762641,null,84736698,null,null,null,null,null,101398793,101398793,101398793,101398793,101398793],["FHIT","FHIT","FHIT","FHIT","FHIT","FHIT&amp;PTPRG","ARHGAP26","TMSB4XP8","CCSER1","TMSB4XP8","CCSER1","CCSER1","CCSER1","CCSER1","CCSER1","CCSER1","CCSER1","WDR70","ARHGAP26","RP11-51G5.1","RP11-295D22.1","KLHL23&amp;RP11-295D22.1","SHANK2&amp;TCP10L2","SHANK2&amp;TCP10L2","SHANK2","SNORD113-4","AL132709.5","MEG8","SNORD113-2","SNORD113-3"],["NOT_PRIORITISED","NOT_PRIORITISED","Exon5del","Exon6del","Exon1del","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","Exon3-4del","Exon8-9del","Exon1-3del","Exon4-5del","Exon9-10del","Exon3-6del","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED","NOT_PRIORITISED"],["3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3","3"],["UPSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT","EXON_DEL","EXON_DEL","EXON_DEL","BIDIRECTIONAL_GENE_FUSION","GENE_FUSION","UPSTREAM_GENE_VARIANT","UPSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT","EXON_DEL","EXON_DEL","EXON_DEL","EXON_DEL","EXON_DEL","EXON_DEL","DOWNSTREAM_GENE_VARIANT","GENE_FUSION","DOWNSTREAM_GENE_VARIANT","GENE_FUSION","BIDIRECTIONAL_GENE_FUSION","GENE_FUSION&amp;FRAMESHIFT_VARIANT","GENE_FUSION","GENE_FUSION","UPSTREAM_GENE_VARIANT","UPSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT"],["DEL","DEL","DEL","DEL","DEL","DUP","BND","DEL","DEL","DEL","DEL","DEL","DEL","DEL","DEL","DEL","DEL","DUP","BND","DEL","BND","BND","BND","BND","BND","DEL","DEL","DEL","DEL","DEL"],["(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(PTPRG|ENSG00000144724|7|0.29)",null,"(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)","(CCSER1|ENSG00000184305|14|0.14)",null,null,null,null,null,null,null,null,null,null,null,null,null],["319,47","319,47","319,47","319,47","319,47","356,14","388,11","252,6","252,6","252,6","252,6","252,6","252,6","252,6","252,6","252,6","252,6","380,18","365,28","317,26",null,null,"333,3","333,3","333,3","249,10","249,10","249,10","249,10","249,10"],["415,78","415,78","415,78","415,78","415,78","540,40","506,27","473,10","473,10","473,10","473,10","473,10","473,10","473,10","473,10","473,10","473,10","502,32","490,53","107,0","290,7","290,7","505,3","505,3","505,3","236,6","236,6","236,6","236,6","236,6"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>chrom<\/th>\n      <th>start<\/th>\n      <th>end<\/th>\n      <th>gene<\/th>\n      <th>priority<\/th>\n      <th>score<\/th>\n      <th>annotation<\/th>\n      <th>type<\/th>\n      <th>lof<\/th>\n      <th>split_read_support<\/th>\n      <th>paired_support_PR<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-45a32b574b6639292ace" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-45a32b574b6639292ace">{"x":{"filter":"none","data":[["3","3","3","3","3","5","6"],[60375800,60375800,60375800,60375800,60375800,142341354,84736590],[60529132,60529132,60529132,60529132,60529132,null,84736698],["FHIT","FHIT","FHIT","FHIT","FHIT","ARHGAP26","RP11-51G5.1"],["NOT_PRIORITISED","NOT_PRIORITISED","Exon5del","Exon6del","Exon1del","NOT_PRIORITISED","NOT_PRIORITISED"],["3","3","3","3","3","3","3"],["UPSTREAM_GENE_VARIANT","DOWNSTREAM_GENE_VARIANT","EXON_DEL","EXON_DEL","EXON_DEL","GENE_FUSION","DOWNSTREAM_GENE_VARIANT"],["DEL","DEL","DEL","DEL","DEL","BND","DEL"],["(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)","(FHIT|ENSG00000189283|8|0.63)",null,null],["319,47","319,47","319,47","319,47","319,47","365,28","317,26"],["415,78","415,78","415,78","415,78","415,78","490,53","107,0"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>chrom<\/th>\n      <th>start<\/th>\n      <th>end<\/th>\n      <th>gene<\/th>\n      <th>priority<\/th>\n      <th>score<\/th>\n      <th>annotation<\/th>\n      <th>type<\/th>\n      <th>lof<\/th>\n      <th>split_read_support<\/th>\n      <th>paired_support_PR<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="loss-of-function-in-tumor-suppressors" class="section level2">
 <h2>Loss of function in tumor suppressors</h2>
@@ -264,19 +276,23 @@ lof &lt;- cnv_all %&gt;%
   dplyr::filter(lof_gene %in% suppressors) %&gt;%
   dplyr::distinct()
 DT::datatable(lof, rownames = FALSE)</code></pre>
-<div id="htmlwidget-17e0b79d82aeee05d52b" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-17e0b79d82aeee05d52b">{"x":{"filter":"none","data":[["3"],[60375800],[60529132],["FHIT"],["8"],["0.63"],["319,47"],["415,78"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>chrom<\/th>\n      <th>start<\/th>\n      <th>end<\/th>\n      <th>lof_gene<\/th>\n      <th>transcript_count<\/th>\n      <th>percent_affected<\/th>\n      <th>split_read_support<\/th>\n      <th>paired_support_PR<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-92ab3f7a9a6956921ad5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-92ab3f7a9a6956921ad5">{"x":{"filter":"none","data":[["3"],[60375800],[60529132],["FHIT"],["8"],["0.63"],["319,47"],["415,78"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>chrom<\/th>\n      <th>start<\/th>\n      <th>end<\/th>\n      <th>lof_gene<\/th>\n      <th>transcript_count<\/th>\n      <th>percent_affected<\/th>\n      <th>split_read_support<\/th>\n      <th>paired_support_PR<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="transcriptional-strand-bias-analysis" class="section level2">
 <h2>Transcriptional strand bias analysis</h2>
 <p>We can determine if a gene mutation is on the transcribed or non-transcribed strand, which can be used to evaluate the involvement of transcription-coupled repair. By convention base substitutions are regarded as C&gt;X or T&gt;X, so we try to determine whether the C or T base is on the same strand as the gene definition. Base substitutions on the same strand as the gene definition are considered ‘untranscribed’, and on the opposite strand ‘transcribed’, since the gene definitions report the coding or sense strand, which is untranscribed. No strand information is reported for base substitutions that overlap with more than one gene on different strands.</p>
-<pre class="r"><code># Get known genes table from UCSC hg19
-genes_hg19 &lt;- genes(TxDb.Hsapiens.UCSC.hg19.knownGene)
+<pre class="r"><code># Get known genes table from UCSC
+if (params$genome_build == 'hg19') {
+  genes_list &lt;- genes(TxDb.Hsapiens.UCSC.hg19.knownGene)
+} else {
+  genes_list &lt;- genes(TxDb.Hsapiens.UCSC.hg38.knownGene)
+}
 
 # Mutation count matrix with strand info (4*6*4=96 -&gt; 96*2=192)
 mut_mat_s &lt;- mut_matrix_stranded(vcf,
                                  ref_genome = ref_genome,
-                                 ranges = genes_hg19,
+                                 ranges = genes_list,
                                  mode = &quot;transcription&quot;)
 
 # Mutation count per type and strand
@@ -337,119 +353,119 @@ strand_bias_rep &lt;- strand_bias_test(strand_counts_rep)</code></pre>
 ##  language (EN)                        
 ##  collate  en_AU.UTF-8                 
 ##  tz       &lt;NA&gt;                        
-##  date     2018-04-23</code></pre>
+##  date     2018-05-15</code></pre>
 <pre><code>## Packages ----------------------------------------------------------------------------------------------------------------------------------</code></pre>
-<pre><code>##  package                           * version  date       source        
-##  AnnotationDbi                     * 1.40.0   2017-11-07 Bioconductor  
-##  assertthat                          0.1      2013-12-06 CRAN (R 3.4.1)
-##  backports                           1.0.5    2017-01-18 CRAN (R 3.4.1)
-##  base                              * 3.4.1    2017-11-15 local         
-##  bindr                               0.1      2016-11-13 CRAN (R 3.4.1)
-##  bindrcpp                          * 0.2      2017-06-17 CRAN (R 3.4.1)
-##  Biobase                           * 2.38.0   2017-11-06 Bioconductor  
-##  BiocGenerics                      * 0.24.0   2017-11-06 Bioconductor  
-##  BiocParallel                        1.12.0   2017-11-06 Bioconductor  
-##  biomaRt                             2.34.0   2017-11-07 Bioconductor  
-##  Biostrings                        * 2.46.0   2017-11-07 Bioconductor  
-##  bit                                 1.1-12   2014-04-09 CRAN (R 3.4.1)
-##  bit64                               0.9-5    2015-07-05 CRAN (R 3.4.1)
-##  bitops                              1.0-6    2013-08-17 CRAN (R 3.4.1)
-##  blob                                1.1.0    2017-06-17 CRAN (R 3.4.1)
-##  BSgenome                          * 1.46.0   2017-11-11 Bioconductor  
-##  BSgenome.Hsapiens.UCSC.hg19       * 1.4.0    2018-02-13 Bioconductor  
-##  cluster                           * 2.0.6    2017-03-16 CRAN (R 3.4.1)
-##  codetools                           0.2-15   2016-10-05 CRAN (R 3.4.1)
-##  colorspace                          1.3-2    2016-12-14 CRAN (R 3.4.1)
-##  compiler                            3.4.1    2017-11-15 local         
-##  cowplot                             0.9.2    2017-12-17 CRAN (R 3.4.1)
-##  datasets                          * 3.4.1    2017-11-15 local         
-##  DBI                                 0.6-1    2017-04-01 CRAN (R 3.4.1)
-##  DelayedArray                        0.4.1    2017-11-06 Bioconductor  
-##  devtools                          * 1.13.2   2017-06-02 CRAN (R 3.4.1)
-##  digest                              0.6.12   2017-01-27 CRAN (R 3.4.1)
-##  doParallel                          1.0.10   2015-10-14 CRAN (R 3.4.1)
-##  dplyr                             * 0.7.4    2017-09-28 CRAN (R 3.4.1)
-##  DT                                * 0.2      2016-08-09 CRAN (R 3.4.1)
-##  evaluate                            0.10.1   2017-06-24 CRAN (R 3.4.1)
-##  foreach                             1.4.3    2015-10-13 CRAN (R 3.4.1)
-##  GenomeInfoDb                      * 1.14.0   2017-11-06 Bioconductor  
-##  GenomeInfoDbData                    1.0.0    2018-02-13 Bioconductor  
-##  GenomicAlignments                   1.14.0   2017-11-10 Bioconductor  
-##  GenomicFeatures                   * 1.30.0   2017-11-11 Bioconductor  
-##  GenomicRanges                     * 1.30.0   2017-11-07 Bioconductor  
-##  ggdendro                            0.1-20   2016-04-27 CRAN (R 3.4.1)
-##  ggplot2                           * 2.2.1    2016-12-30 CRAN (R 3.4.1)
-##  glue                                1.1.1    2017-06-21 CRAN (R 3.4.1)
-##  graphics                          * 3.4.1    2017-11-15 local         
-##  grDevices                         * 3.4.1    2017-11-15 local         
-##  grid                                3.4.1    2017-11-15 local         
-##  gridBase                            0.4-7    2014-02-24 CRAN (R 3.4.1)
-##  gridExtra                           2.3      2017-09-09 CRAN (R 3.4.1)
-##  gtable                              0.2.0    2016-02-26 CRAN (R 3.4.1)
-##  hms                                 0.3      2016-11-22 CRAN (R 3.4.1)
-##  htmltools                           0.3.6    2017-04-28 CRAN (R 3.4.1)
-##  htmlwidgets                         0.9      2017-07-10 CRAN (R 3.4.1)
-##  IRanges                           * 2.12.0   2017-11-06 Bioconductor  
-##  iterators                           1.0.8    2015-10-13 CRAN (R 3.4.1)
-##  jsonlite                            1.5      2017-06-01 CRAN (R 3.4.1)
-##  knitr                             * 1.16     2017-05-18 CRAN (R 3.4.1)
-##  labeling                            0.3      2014-08-23 CRAN (R 3.4.1)
-##  lattice                             0.20-34  2016-09-06 CRAN (R 3.4.1)
-##  lazyeval                            0.2.0    2016-06-12 CRAN (R 3.4.1)
-##  magrittr                            1.5      2014-11-22 CRAN (R 3.4.1)
-##  MASS                                7.3-48   2017-12-25 CRAN (R 3.4.1)
-##  Matrix                              1.2-7.1  2016-09-01 CRAN (R 3.4.1)
-##  matrixStats                         0.52.2   2017-04-14 CRAN (R 3.4.1)
-##  memoise                             1.1.0    2017-04-21 CRAN (R 3.4.1)
-##  methods                           * 3.4.1    2017-11-15 local         
-##  munsell                             0.4.3    2016-02-13 CRAN (R 3.4.1)
-##  MutationalPatterns                * 1.4.1    2017-12-14 Bioconductor  
-##  NMF                               * 0.20.6   2015-05-26 CRAN (R 3.4.1)
-##  parallel                          * 3.4.1    2017-11-15 local         
-##  pillar                              1.1.0    2018-01-14 CRAN (R 3.4.1)
-##  pkgconfig                           2.0.1    2017-03-21 CRAN (R 3.4.1)
-##  pkgmaker                          * 0.22     2014-05-14 CRAN (R 3.4.1)
-##  plyr                                1.8.4    2016-06-08 CRAN (R 3.4.1)
-##  pracma                              2.0.4    2017-04-03 CRAN (R 3.4.1)
-##  prettyunits                         1.0.2    2015-07-13 CRAN (R 3.4.1)
-##  progress                            1.1.2    2016-12-14 CRAN (R 3.4.1)
-##  purrr                               0.2.2    2016-06-18 CRAN (R 3.3.1)
-##  quadprog                            1.5-5    2013-04-17 CRAN (R 3.4.1)
-##  R6                                  2.2.0    2016-10-05 CRAN (R 3.4.1)
-##  RColorBrewer                        1.1-2    2014-12-07 CRAN (R 3.4.1)
-##  Rcpp                                0.12.13  2017-09-28 CRAN (R 3.4.1)
-##  RCurl                               1.95-4.8 2016-03-01 CRAN (R 3.4.1)
-##  readr                             * 1.1.1    2017-05-16 CRAN (R 3.4.1)
-##  registry                          * 0.3      2015-07-08 CRAN (R 3.4.1)
-##  reshape2                            1.4.2    2016-10-22 CRAN (R 3.4.1)
-##  rlang                               0.1.2    2017-08-09 CRAN (R 3.4.1)
-##  rmarkdown                         * 1.6      2017-06-15 CRAN (R 3.4.1)
-##  RMySQL                              0.10.11  2017-03-29 CRAN (R 3.4.1)
-##  rngtools                          * 1.2.4    2014-03-06 CRAN (R 3.4.1)
-##  rprojroot                           1.2      2017-01-16 CRAN (R 3.4.1)
-##  Rsamtools                           1.30.0   2017-11-08 Bioconductor  
-##  RSQLite                             2.0      2017-06-19 CRAN (R 3.4.1)
-##  rtracklayer                       * 1.38.0   2017-11-10 Bioconductor  
-##  S4Vectors                         * 0.16.0   2017-11-06 Bioconductor  
-##  scales                              0.5.0    2017-08-24 CRAN (R 3.4.1)
-##  stats                             * 3.4.1    2017-11-15 local         
-##  stats4                            * 3.4.1    2017-11-15 local         
-##  stringi                             1.1.5    2017-04-07 CRAN (R 3.4.1)
-##  stringr                           * 1.2.0    2017-02-18 CRAN (R 3.4.1)
-##  SummarizedExperiment                1.8.0    2017-11-10 Bioconductor  
-##  tibble                              1.4.2    2018-01-22 CRAN (R 3.4.1)
-##  tidyr                             * 0.7.1    2017-09-01 CRAN (R 3.4.1)
-##  tidyselect                          0.2.3    2017-11-06 CRAN (R 3.4.1)
-##  tools                               3.4.1    2017-11-15 local         
-##  TxDb.Hsapiens.UCSC.hg19.knownGene * 3.2.2    2018-02-13 Bioconductor  
-##  utils                             * 3.4.1    2017-11-15 local         
-##  VariantAnnotation                   1.24.1   2017-11-12 Bioconductor  
-##  withr                               1.0.2    2016-06-20 CRAN (R 3.4.1)
-##  XML                                 3.98-1.6 2017-03-30 CRAN (R 3.4.1)
-##  xtable                              1.8-2    2016-02-05 CRAN (R 3.4.1)
-##  XVector                           * 0.18.0   2017-11-07 Bioconductor  
-##  yaml                                2.1.14   2016-11-12 CRAN (R 3.4.1)
-##  zlibbioc                            1.24.0   2017-11-05 Bioconductor</code></pre>
+<pre><code>##  package                           * version   date       source        
+##  AnnotationDbi                     * 1.40.0    2017-11-07 Bioconductor  
+##  assertthat                          0.2.0     2017-04-11 CRAN (R 3.4.1)
+##  backports                           1.1.2     2017-12-13 CRAN (R 3.4.1)
+##  base                              * 3.4.1     2017-11-15 local         
+##  bindr                               0.1.1     2018-03-13 CRAN (R 3.4.1)
+##  bindrcpp                          * 0.2.2     2018-03-29 CRAN (R 3.4.1)
+##  Biobase                           * 2.38.0    2017-11-06 Bioconductor  
+##  BiocGenerics                      * 0.24.0    2017-11-06 Bioconductor  
+##  BiocParallel                        1.12.0    2017-11-06 Bioconductor  
+##  biomaRt                             2.34.2    2018-05-15 Bioconductor  
+##  Biostrings                        * 2.46.0    2017-11-07 Bioconductor  
+##  bit                                 1.1-12    2014-04-09 CRAN (R 3.4.1)
+##  bit64                               0.9-7     2017-05-08 CRAN (R 3.4.1)
+##  bitops                              1.0-6     2013-08-17 CRAN (R 3.4.1)
+##  blob                                1.1.1     2018-03-25 CRAN (R 3.4.1)
+##  BSgenome                          * 1.46.0    2017-11-11 Bioconductor  
+##  BSgenome.Hsapiens.UCSC.hg19       * 1.4.0     2018-02-13 Bioconductor  
+##  cluster                           * 2.0.7-1   2018-04-09 CRAN (R 3.4.1)
+##  codetools                           0.2-15    2016-10-05 CRAN (R 3.4.1)
+##  colorspace                          1.3-2     2016-12-14 CRAN (R 3.4.1)
+##  compiler                            3.4.1     2017-11-15 local         
+##  cowplot                             0.9.2     2017-12-17 CRAN (R 3.4.1)
+##  datasets                          * 3.4.1     2017-11-15 local         
+##  DBI                                 1.0.0     2018-05-02 CRAN (R 3.4.1)
+##  DelayedArray                        0.4.1     2017-11-06 Bioconductor  
+##  devtools                          * 1.13.5    2018-02-18 CRAN (R 3.4.1)
+##  digest                              0.6.15    2018-01-28 CRAN (R 3.4.1)
+##  doParallel                          1.0.11    2017-09-28 CRAN (R 3.4.1)
+##  dplyr                             * 0.7.4     2017-09-28 CRAN (R 3.4.1)
+##  DT                                * 0.2       2016-08-09 CRAN (R 3.4.1)
+##  evaluate                            0.10.1    2017-06-24 CRAN (R 3.4.1)
+##  foreach                             1.4.4     2017-12-12 CRAN (R 3.4.1)
+##  GenomeInfoDb                      * 1.14.0    2017-11-06 Bioconductor  
+##  GenomeInfoDbData                    1.0.0     2018-02-13 Bioconductor  
+##  GenomicAlignments                   1.14.2    2018-05-15 Bioconductor  
+##  GenomicFeatures                   * 1.30.0    2017-11-11 Bioconductor  
+##  GenomicRanges                     * 1.30.3    2018-05-15 Bioconductor  
+##  ggdendro                            0.1-20    2016-04-27 CRAN (R 3.4.1)
+##  ggplot2                           * 2.2.1     2016-12-30 CRAN (R 3.4.1)
+##  glue                                1.2.0     2017-10-29 CRAN (R 3.4.1)
+##  graphics                          * 3.4.1     2017-11-15 local         
+##  grDevices                         * 3.4.1     2017-11-15 local         
+##  grid                                3.4.1     2017-11-15 local         
+##  gridBase                            0.4-7     2014-02-24 CRAN (R 3.4.1)
+##  gridExtra                           2.3       2017-09-09 CRAN (R 3.4.1)
+##  gtable                              0.2.0     2016-02-26 CRAN (R 3.4.1)
+##  hms                                 0.4.2     2018-03-10 CRAN (R 3.4.1)
+##  htmltools                           0.3.6     2017-04-28 CRAN (R 3.4.1)
+##  htmlwidgets                         1.2       2018-04-19 CRAN (R 3.4.1)
+##  httr                                1.3.1     2017-08-20 CRAN (R 3.4.1)
+##  IRanges                           * 2.12.0    2017-11-06 Bioconductor  
+##  iterators                           1.0.9     2017-12-12 CRAN (R 3.4.1)
+##  jsonlite                            1.5       2017-06-01 CRAN (R 3.4.1)
+##  knitr                             * 1.20      2018-02-20 CRAN (R 3.4.1)
+##  labeling                            0.3       2014-08-23 CRAN (R 3.4.1)
+##  lattice                             0.20-35   2017-03-25 CRAN (R 3.4.1)
+##  lazyeval                            0.2.1     2017-10-29 CRAN (R 3.4.1)
+##  magrittr                            1.5       2014-11-22 CRAN (R 3.4.1)
+##  MASS                                7.3-50    2018-04-30 CRAN (R 3.4.1)
+##  Matrix                              1.2-14    2018-04-09 CRAN (R 3.4.1)
+##  matrixStats                         0.53.1    2018-02-11 CRAN (R 3.4.1)
+##  memoise                             1.1.0     2017-04-21 CRAN (R 3.4.1)
+##  methods                           * 3.4.1     2017-11-15 local         
+##  munsell                             0.4.3     2016-02-13 CRAN (R 3.4.1)
+##  MutationalPatterns                * 1.4.1     2017-12-14 Bioconductor  
+##  NMF                               * 0.20.6    2015-05-26 CRAN (R 3.4.1)
+##  parallel                          * 3.4.1     2017-11-15 local         
+##  pillar                              1.2.2     2018-04-26 CRAN (R 3.4.1)
+##  pkgconfig                           2.0.1     2017-03-21 CRAN (R 3.4.1)
+##  pkgmaker                          * 0.22      2014-05-14 CRAN (R 3.4.1)
+##  plyr                                1.8.4     2016-06-08 CRAN (R 3.4.1)
+##  pracma                              2.1.4     2018-01-30 CRAN (R 3.4.1)
+##  prettyunits                         1.0.2     2015-07-13 CRAN (R 3.4.1)
+##  progress                            1.1.2     2016-12-14 CRAN (R 3.4.1)
+##  purrr                               0.2.4     2017-10-18 CRAN (R 3.4.1)
+##  R6                                  2.2.2     2017-06-17 CRAN (R 3.4.1)
+##  RColorBrewer                        1.1-2     2014-12-07 CRAN (R 3.4.1)
+##  Rcpp                                0.12.16   2018-03-13 CRAN (R 3.4.1)
+##  RCurl                               1.95-4.10 2018-01-04 CRAN (R 3.4.1)
+##  readr                             * 1.1.1     2017-05-16 CRAN (R 3.4.1)
+##  registry                          * 0.5       2017-12-03 CRAN (R 3.4.1)
+##  reshape2                            1.4.3     2017-12-11 CRAN (R 3.4.1)
+##  rlang                               0.2.0     2018-02-20 CRAN (R 3.4.1)
+##  rmarkdown                         * 1.6       2017-06-15 CRAN (R 3.4.1)
+##  RMySQL                              0.10.15   2018-05-13 CRAN (R 3.4.1)
+##  rngtools                          * 1.2.4     2014-03-06 CRAN (R 3.4.1)
+##  rprojroot                           1.3-2     2018-01-03 CRAN (R 3.4.1)
+##  Rsamtools                           1.30.0    2017-11-08 Bioconductor  
+##  RSQLite                             2.1.1     2018-05-06 CRAN (R 3.4.1)
+##  rtracklayer                       * 1.38.0    2017-11-10 Bioconductor  
+##  S4Vectors                         * 0.16.0    2017-11-06 Bioconductor  
+##  scales                              0.5.0     2017-08-24 CRAN (R 3.4.1)
+##  stats                             * 3.4.1     2017-11-15 local         
+##  stats4                            * 3.4.1     2017-11-15 local         
+##  stringi                             1.2.2     2018-05-02 CRAN (R 3.4.1)
+##  stringr                           * 1.3.1     2018-05-10 CRAN (R 3.4.1)
+##  SummarizedExperiment                1.8.1     2018-05-15 Bioconductor  
+##  tibble                              1.4.2     2018-01-22 CRAN (R 3.4.1)
+##  tidyr                             * 0.7.1     2017-09-01 CRAN (R 3.4.1)
+##  tidyselect                          0.2.4     2018-02-26 CRAN (R 3.4.1)
+##  tools                               3.4.1     2017-11-15 local         
+##  TxDb.Hsapiens.UCSC.hg19.knownGene * 3.2.2     2018-02-13 Bioconductor  
+##  utils                             * 3.4.1     2017-11-15 local         
+##  VariantAnnotation                   1.24.1    2017-11-12 Bioconductor  
+##  withr                               2.1.2     2018-03-15 CRAN (R 3.4.1)
+##  XML                                 3.98-1.6  2017-03-30 CRAN (R 3.4.1)
+##  xtable                              1.8-2     2016-02-05 CRAN (R 3.4.1)
+##  XVector                           * 0.18.0    2017-11-07 Bioconductor  
+##  yaml                                2.1.19    2018-05-01 CRAN (R 3.4.1)
+##  zlibbioc                            1.24.0    2017-11-05 Bioconductor</code></pre>
 </div>
 
 
