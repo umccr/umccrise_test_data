@@ -11,7 +11,6 @@ shell.prefix('')  # Fixes Snakemake on Spartan
 Spa_HSAPIENS_DIR = '/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens'
 Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
 Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/cancer_genes_ENSG.txt'
-# TODO: compare ENSG and az300
 
 Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
 run = BcbioProject(Spa_BCBIO_DIR)
@@ -47,7 +46,6 @@ rule all:
         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
         expand(join(bcbio_copy_path, '.populated_{batch}.done'), batch=batch_by_name.keys()),
-        az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
         pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
@@ -325,14 +323,11 @@ rule populate_batch:
 #### Reference data ####
 rule prep_ref_data:
     input:
-        az300 = join(Spa_HSAPIENS_DIR, 'GRCh37/coverage/prioritize/cancer/az300.bed.gz'),
         giab_regions = join(Spa_HSAPIENS_DIR, 'GRCh37/validation/giab-NA12878/truth_regions.bed'),
         roi_bed = rules.project_roi.output[0]
     output:
-        az300 = 'data/genomes/Hsapiens/GRCh37/coverage/prioritize/cancer/az300.bed.gz',
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed'
     shell:
-        'cp {input.az300} {output.az300} && '
         'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output.giab_regions}'
 
 
