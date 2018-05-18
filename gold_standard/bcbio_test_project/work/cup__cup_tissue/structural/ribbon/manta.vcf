@@ -1,0 +1,155 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##bpiVersion=1.5
+##cmdline=/data/projects/punim0010/local/share/bcbio/anaconda/share/manta-1.2.1-0/bin/configManta.py --normalBam=/data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/align/cup_normal/cup_normal-sort.bam --tumorBam=/data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/align/cup_tissue/cup_tissue-sort.bam --referenceFasta=/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa --runDir=/data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/bcbiotx/tmpeqLNtR/manta
+##fileDate=20180125
+##reference=file:///data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa
+##source=GenerateSVCandidates 1.2.1
+##SnpEffVersion="4.3i (build 2016-12-15 22:33), by Pablo Cingolani"
+##SnpEffCmd="SnpEff  -cancer -i vcf -o vcf -csvStats /data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/structural/cup_tissue/manta/results/variants/somaticSV-bpi-effects-stats.csv -s /data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/structural/cup_tissue/manta/results/variants/somaticSV-bpi-effects-stats.html GRCh37.75 /data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/structural/cup_tissue/manta/results/variants/somaticSV-bpi.vcf.gz "
+##INFO=<ID=BND_DEPTH,Number=1,Type=Integer,Description="Read depth at local translocation breakend">
+##INFO=<ID=BPI_AF,Number=2,Type=Float,Description="AF at each breakpoint">
+##INFO=<ID=BPI_AMBIGUOUS,Number=0,Type=Flag,Description="BPI could not determine the breakpoints, inspect manually">
+##INFO=<ID=BPI_END,Number=1,Type=Integer,Description="BPI adjusted breakend location">
+##INFO=<ID=BPI_START,Number=1,Type=Integer,Description="BPI adjusted breakend location">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END">
+##INFO=<ID=CIGAR,Number=A,Type=String,Description="CIGAR alignment for each alternate indel allele">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=EVENT,Number=1,Type=String,Description="ID of event associated to breakend">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical homology at event breakpoints">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=INV3,Number=0,Type=Flag,Description="Inversion breakends open 3' of reported location">
+##INFO=<ID=INV5,Number=0,Type=Flag,Description="Inversion breakends open 5' of reported location">
+##INFO=<ID=JUNCTION_SOMATICSCORE,Number=1,Type=Integer,Description="If the SV junctino is part of an EVENT (ie. a multi-adjacency variant), this field provides the SOMATICSCORE value for the adjacency in question only">
+##INFO=<ID=LEFT_SVINSSEQ,Number=.,Type=String,Description="Known left side of insertion for an insertion of unknown length">
+##INFO=<ID=MATEID,Number=.,Type=String,Description="ID of mate breakend">
+##INFO=<ID=MATE_BND_DEPTH,Number=1,Type=Integer,Description="Read depth at remote translocation mate breakend">
+##INFO=<ID=RIGHT_SVINSSEQ,Number=.,Type=String,Description="Known right side of insertion for an insertion of unknown length">
+##INFO=<ID=SOMATIC,Number=0,Type=Flag,Description="Somatic mutation">
+##INFO=<ID=SOMATICSCORE,Number=1,Type=Integer,Description="Somatic variant quality score">
+##INFO=<ID=SVINSLEN,Number=.,Type=Integer,Description="Length of insertion">
+##INFO=<ID=SVINSSEQ,Number=.,Type=String,Description="Sequence of insertion">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO'">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##INFO=<ID=SIMPLE_ANN,Number=.,Type=String,Description="Simplified human readable structural variant annotation: 'SVTYPE | ANNOTATION | GENE(s) | TRANSCRIPT | DETAIL (exon losses, KNOWN_FUSION, ON_PRIORITY_LIST, NOT_PRIORITISED) | PRIORITY (1-3) '">
+##INFO=<ID=SV_HIGHEST_TIER,Number=1,Type=Integer,Description="Highest priority tier for the effects of a variant entry">
+##FORMAT=<ID=PR,Number=.,Type=Integer,Description="Spanning paired-read support for the ref and alt alleles in the order listed">
+##FORMAT=<ID=SR,Number=.,Type=Integer,Description="Split reads for the ref and alt alleles in the order listed, for reads where P(allele|read)>0.999">
+##FILTER=<ID=BPI_BreakpointError,Description="BPI failed to determine breakpoints">
+##FILTER=<ID=BPI_ClippingConcordance,Description="At least 5 base clipped bases concordance between tumor and normal">
+##FILTER=<ID=BPI_MinAnchorLength,Description="There isn't at least one PR with >=30 bases matched in both alignments">
+##FILTER=<ID=BPI_MinDepth,Description="The depth across one of the breakpoints is <10">
+##FILTER=<ID=BPI_PRNormalSupport,Description="PR support in the normal">
+##FILTER=<ID=BPI_PRSupportZero,Description="No PR support in tumor">
+##FILTER=<ID=BPI_SRNormalSupport,Description="Short delete or dupe (<1000) has SR support in normal">
+##FILTER=<ID=BPI_SRSupportZero,Description="Short delete or dupe (<1000) must have SR support">
+##FILTER=<ID=MaxDepth,Description="Normal sample site depth is greater than 3x the median chromosome depth near one or both variant breakends">
+##FILTER=<ID=MaxMQ0Frac,Description="For a small variant (<1000 bases) in the normal sample, the fraction of reads with MAPQ0 around either breakend exceeds 0.4">
+##FILTER=<ID=MinSomaticScore,Description="Somatic score is less than 30">
+##FILTER=<ID=REJECT,Description="Rejected due various criteria (missing ANN/BND, purely intergenic, small events)">
+##ALT=<ID=BND,Description="Translocation Breakend">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=INS,Description="Insertion">
+##ALT=<ID=INV,Description="Inversion">
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##bcftools_annotateVersion=1.6+htslib-1.6
+##bcftools_annotateCommand=annotate -h /data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/bcbiotx/tmpDeFWGE/cup_tissue-manta-simple-prep-header.txt; Date=Thu Jan 25 17:46:12 2018
+##bcftools_viewVersion=1.7+htslib-1.7
+##bcftools_viewCommand=view -h /data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final/cup_tissue/cup-sv-prioritize-manta.vcf.gz; Date=Tue Apr 17 00:10:15 2018
+##bcftools_viewCommand=view -f.,PASS,REJECT,Intergenic /Users/vsaveliev/git/umccr/umccrise_test_data/data/bcbio_test_project/final/cup_tissue/cup-sv-prioritize-manta.vcf.gz; Date=Fri May 18 11:58:52 2018
+##bcftools_filterVersion=1.7+htslib-1.7
+##bcftools_filterCommand=filter -i '(FORMAT/SR[1:1]>=5 | FORMAT/PR[1:1]>=5) & BPI_AF >= 0.1' cup__cup_tissue/structural/cup__cup_tissue-sv-prioritize-manta.vcf; Date=Fri May 18 11:58:53 2018
+##bcftools_viewCommand=view cup__cup_tissue/structural/cup__cup_tissue-sv-prioritize-manta-filter.vcf; Date=Fri May 18 11:59:29 2018
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	cup_normal	cup_tissue
+3	60375800	MantaDEL:0:70408:70411:0:0:0	T	<DEL>	.	PASS	BPI_AF=0.171,0.181;BPI_END=60529132;BPI_START=60375800;END=60529132;SOMATIC;SOMATICSCORE=175;SVINSLEN=2;SVINSSEQ=CA;SVLEN=-153332;SVTYPE=DEL;ANN=<DEL>|exon_loss_variant&splice_donor_variant&splice_region_variant&intron_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000341848|protein_coding|1/5|c.-6437_103+146792del||||||,<DEL>|exon_loss_variant&splice_region_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000476844|protein_coding|5/10|c.-17-6420_103+146792del||||||,<DEL>|exon_loss_variant&splice_region_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000492590|protein_coding|5/10|c.-17-6420_103+146792del||||||,<DEL>|exon_loss_variant&splice_region_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000468189|protein_coding|5/9|c.-17-6420_103+146792del||||||,<DEL>|exon_loss_variant&splice_region_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000488467|protein_coding|6/7|c.-17-6420_103+146792del||||||WARNING_TRANSCRIPT_INCOMPLETE,<DEL>|splice_acceptor_variant&splice_donor_variant&5_prime_UTR_truncation&exon_loss_variant&splice_region_variant&intron_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000476844|protein_coding|5/10|c.-17-6420_103+146792del||||||,<DEL>|splice_acceptor_variant&splice_donor_variant&5_prime_UTR_truncation&exon_loss_variant&splice_region_variant&intron_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000492590|protein_coding|5/10|c.-17-6420_103+146792del||||||,<DEL>|splice_acceptor_variant&splice_donor_variant&5_prime_UTR_truncation&exon_loss_variant&splice_region_variant&intron_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000468189|protein_coding|5/9|c.-17-6420_103+146792del||||||,<DEL>|splice_acceptor_variant&splice_donor_variant&5_prime_UTR_truncation&exon_loss_variant&splice_region_variant&intron_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000488467|protein_coding|6/7|c.-17-6420_103+146792del||||||WARNING_TRANSCRIPT_INCOMPLETE,<DEL>|splice_acceptor_variant&splice_region_variant&intron_variant&non_coding_transcript_exon_variant|HIGH|FHIT|ENSG00000189283|transcript|ENST00000490952|retained_intron|6/6|n.551-6420_*145742del||||||,<DEL>|upstream_gene_variant|MODIFIER|FHIT|ENSG00000189283|transcript|ENST00000341848|protein_coding|1/5|c.-6437_103+146792del|||||0|,<DEL>|downstream_gene_variant|MODIFIER|FHIT|ENSG00000189283|transcript|ENST00000490952|retained_intron|6/6|n.551-6420_*145742del|||||145742|;LOF=(FHIT|ENSG00000189283|8|0.63);SIMPLE_ANN=DEL|UPSTREAM_GENE_VARIANT|FHIT|ENST00000341848|NOT_PRIORITISED|3,DEL|DOWNSTREAM_GENE_VARIANT|FHIT|ENST00000490952|NOT_PRIORITISED|3,DEL|EXON_DEL|FHIT|ENST00000492590|Exon5del|3,DEL|EXON_DEL|FHIT|ENST00000468189|Exon5del|3,DEL|EXON_DEL|FHIT|ENST00000488467|Exon6del|3,DEL|EXON_DEL|FHIT|ENST00000341848|Exon1del|3,DEL|EXON_DEL|FHIT|ENST00000476844|Exon5del|3;SV_HIGHEST_TIER=3	PR:SR	189,0:134,0	415,78:319,47
+5	142341354	MantaBND:98352:0:1:0:0:0:1	A	]3:137753263]A	.	PASS	BND_DEPTH=100;BPI_AF=0.117,0.108;BPI_END=137753263;BPI_START=142341353;EVENT=MantaBND:98352:0:1:0:0:0:0;JUNCTION_SOMATICSCORE=107;MATEID=MantaBND:98352:0:1:0:0:0:0;MATE_BND_DEPTH=84;SOMATIC;SOMATICSCORE=150;SVTYPE=BND;ANN=]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000274498|protein_coding||t(5%3B3)(%3B)(c.1107+29664)|t(5%3B3)(ENST00000274498:Val370_Ter815%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000378004|protein_coding||t(5%3B3)(%3B)(c.1107+29664)|t(5%3B3)(ENST00000378004:Val370_Ter760%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000378013|protein_coding||t(5%3B3)(%3B)(c.*67454)|t(5%3B3)(ENST00000378013:Met1_???167%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000475287|retained_intron||t(5%3B3)(%3B)(n.*59776)|t(5%3B3)(ENST00000475287:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000477867|processed_transcript||t(5%3B3)(%3B)(n.*39675)|t(5%3B3)(ENST00000477867:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000451259|protein_coding||t(5%3B3)(%3B)(c.210+29664)|t(5%3B3)(ENST00000451259:Val71_???92%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000461314|processed_transcript||t(5%3B3)(%3B)(n.*29664)|t(5%3B3)(ENST00000461314:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000469131|retained_intron||t(5%3B3)(%3B)(n.401+29664)|t(5%3B3)(ENST00000469131:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000469396|processed_transcript||t(5%3B3)(%3B)(n.335+29664)|t(5%3B3)(ENST00000469396:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000464838|processed_transcript||t(5%3B3)(%3B)(n.-48947)|t(5%3B3)(ENST00000464838:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000470032|processed_transcript||t(5%3B3)(%3B)(n.-52291)|t(5%3B3)(ENST00000470032:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000443674|protein_coding||t(5%3B3)(%3B)(c.-75409)|t(5%3B3)(ENST00000443674:Ala1_Ter388%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000418236|protein_coding||t(5%3B3)(%3B)(c.-92652)|t(5%3B3)(ENST00000418236:Pro1_Ter294%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000443045|protein_coding||t(5%3B3)(%3B)(c.-94294)|t(5%3B3)(ENST00000443045:Ala1_Ter98%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000419676|nonsense_mediated_decay||t(5%3B3)(%3B)(c.-159323)|t(5%3B3)(ENST00000419676:Ile1_Ter128%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000424007|nonsense_mediated_decay||t(5%3B3)(%3B)(c.-159326)|t(5%3B3)(ENST00000424007:Val1_Ter128%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000489924|retained_intron||t(5%3B3)(%3B)(n.-172196)|t(5%3B3)(ENST00000489924:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000486650|processed_transcript||t(5%3B3)(%3B)(n.-203124)|t(5%3B3)(ENST00000486650:null%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000421521|protein_coding||t(5%3B3)(%3B)(c.-245410)|t(5%3B3)(ENST00000421521:Pro1_Ter154%3B)|||||,]3:137753263]A|gene_fusion|HIGH|ARHGAP26|ENSG00000145819|transcript|ENST00000425417|protein_coding||t(5%3B3)(%3B)(c.-245413)|t(5%3B3)(ENST00000425417:Pro1_Ter98%3B)|||||;SIMPLE_ANN=BND|GENE_FUSION|ARHGAP26|ENST00000274498|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000378004|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000378013|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000475287|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000477867|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000451259|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000461314|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000469131|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000469396|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000464838|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000470032|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000443674|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000418236|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000443045|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000419676|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000424007|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000489924|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000486650|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000421521|NOT_PRIORITISED|3,BND|GENE_FUSION|ARHGAP26|ENST00000425417|NOT_PRIORITISED|3;SV_HIGHEST_TIER=3	PR:SR	159,0:128,0	490,53:365,28
+6	84736590	MantaDEL:170600:0:1:0:0:0	CTCTCTTTCTGGTAGTGCAAAATGAATTTTAGTTGGCATTTCAGCATGGCTCACAGCTTCGTCTTCTTGATTGAATGCCAAGCATGAACTAAAATATATCAGATGTTTT	C	.	PASS	BPI_AF=0.193,0.19;BPI_END=84736698;BPI_START=84736590;CIGAR=1M108D;END=84736698;SOMATIC;SOMATICSCORE=56;SVLEN=-108;SVTYPE=DEL;ANN=C|downstream_gene_variant|MODIFIER|RP11-51G5.1|ENSG00000230852|transcript|ENST00000444796|lincRNA||n.*2319_*2426del|||||2319|,C|intergenic_region|MODIFIER|RP11-51G5.1-MRAP2|ENSG00000230852-ENSG00000135324|intergenic_region|ENSG00000230852-ENSG00000135324|||n.84736591_84736698del||||||;SIMPLE_ANN=DEL|DOWNSTREAM_GENE_VARIANT|RP11-51G5.1|ENST00000444796|NOT_PRIORITISED|3;SV_HIGHEST_TIER=3	PR:SR	31,0:133,0	107,0:317,26
