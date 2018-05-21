@@ -117,6 +117,7 @@ rule rsync_project:
         ' --include "*/"'
         ' --include "multiqc_report.html"'
         ' --include "multiqc_list_files.txt"'
+        ' --include "list_files_final.txt"'
         ' --include "multiqc_config.yaml"'
         ' --include "multiqc_config.yaml"'
         ' --include "data_versions.csv"'
