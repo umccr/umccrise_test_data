@@ -8,9 +8,9 @@ from ngs_utils.file_utils import splitext_plus
 shell.prefix('')  # Fixes Snakemake on Spartan
 
 
-Spa_HSAPIENS_DIR = '/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens'
+Spa_HSAPIENS_DIR = '/data/cephfs/punim0010/local/stable/bcbio/genomes/Hsapiens'
 Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
-Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/cancer_genes_ENSG.txt'
+Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/ref_data/predisposition_genes_engs.txt'
 
 Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
 run = BcbioProject(Spa_BCBIO_DIR)
