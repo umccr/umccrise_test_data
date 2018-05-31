@@ -4,13 +4,15 @@ from ngs_utils.bcbio import BcbioProject
 from os.path import join, abspath, relpath, basename
 from glob import glob
 from ngs_utils.file_utils import splitext_plus
+from umccrise import get_cancer_genes_ensg
+
 
 shell.prefix('')  # Fixes Snakemake on Spartan
 
 
 Spa_HSAPIENS_DIR = '/data/cephfs/punim0010/local/stable/bcbio/genomes/Hsapiens'
 Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
-Spa_CANCER_GENES_ENSG = '/data/cephfs/punim0010/extras/umccrise/umccrise/ref_data/predisposition_genes_engs.txt'
+Spa_CANCER_GENES_ENSG = get_cancer_genes_ensg()
 
 Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
 run = BcbioProject(Spa_BCBIO_DIR)
@@ -117,7 +119,7 @@ rule downsample_cnvkit_cns:
     input:
         lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-cnvkit-call.cns')
     output:
-        'work_snake/sv/{batch}-cnvkit.cns'
+        'work_snake/sv/{batch}-cnvkit-call.cns'
     shell:
         'head -n1 {input} > {output} && '
         'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output}'
