@@ -115,13 +115,12 @@ rule cnvkit_roi:
 
 rule downsample_cnvkit_cns:
     input:
-        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-cnvkit.cns')
+        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-cnvkit-call.cns')
     output:
         'work_snake/sv/{batch}-cnvkit.cns'
     shell:
         'head -n1 {input} > {output} && '
-        'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output} && '
-        'echo "GL1231\t12\t698\tAC125634.1\t0.040144\t28.8\t16\t15.263" >> {output}'
+        'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output}'
 
 ######################################
 #### MANTA ####
@@ -298,7 +297,7 @@ rule populate_batch:
         cnvkit_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize-cnvkit.vcf.gz')
         shell(f'bgzip -c {input.cnvkit_vcf} > {cnvkit_vcf} && tabix {cnvkit_vcf}')
 
-        cnvkit_cns = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-cnvkit.cns')
+        cnvkit_cns = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-cnvkit-call.cns')
         shell(f'cp {input.cnvkit_cns} {cnvkit_cns}')
 
         manta_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize-manta.vcf.gz')
