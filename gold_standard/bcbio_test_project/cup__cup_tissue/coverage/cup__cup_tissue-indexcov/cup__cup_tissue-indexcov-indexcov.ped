@@ -1,2 +1,2 @@
 #family_id	sample_id	paternal_id	maternal_id	sex	phenotype	CNX	bins.out	bins.lo	bins.hi	bins.in	slope	p.out	mapped	unmapped
-unknown	cup_tissue	-9	-9	2	-9	2.04	142987	142903	28	41	0.039	3487.49	46921	1
+unknown	cup_tissue	-9	-9	2	-9	2.00	134882	134807	26	41	0.042	3289.80	44578	1
