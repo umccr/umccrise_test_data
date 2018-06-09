@@ -132,7 +132,7 @@ rule downsample_manta:
     output:
         'work_snake/sv/{batch}-manta.vcf'
     shell:
-        downsample_vcf(10)
+        'bcftools view -f.,PASS,REJECT,Intergenic,MissingAnn {input} -o {output}'
 
 rule manta_roi:
     input:
@@ -158,8 +158,7 @@ rule batch_roi:
     input:
         rules.somatic_roi.output[0],
         rules.germline_roi.output[0],
-        rules.cnvkit_roi.output[0],
-        rules.manta_roi.output[0]
+        rules.cnvkit_roi.output[0]
     output:
         'work_snake/{batch}-roi.bed'
     shell:
