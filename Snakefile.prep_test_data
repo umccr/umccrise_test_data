@@ -260,19 +260,16 @@ rule rsync_project:
         project_copy = bcbio_copy_path,
         marker = join(bcbio_copy_final_dir, basename(run.date_dir), '.rsynced.done')
     run:
-        includes = [
-            "*/",
-            "data_versions.csv",
-            "programs.txt",
-        ]
-        includes_line = ''.join([f' --include {_f}' for _f in includes])
         shell(
             f'rsync -tavz {run.config_dir} {output.project_copy}'
             f' && rsync -tavz'
             f' --exclude ".snakemake/"'
             f' --exclude "umccrised/"'
             f' --exclude "test/"'
-            f'{includes_line}'
+            f' --include "*/"'
+            f' --include "data_versions.csv"'
+            f' --include "programs.txt"'
+            f' --include "multiqc_report.html"'
             f' --exclude "*"'
             f' {run.final_dir} {output.project_copy}'
         )
@@ -283,7 +280,6 @@ mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
 qc_files = [line.strip() for line in open(mq_list_files) if line.strip()]
 inp_qc_files = [join(run.final_dir, qc_f) for qc_f in qc_files]
 out_qc_files = [join(bcbio_copy_final_dir, qc_f) for qc_f in qc_files]
-print(f'out_qc_files: ' + '\n'.join(out_qc_files))
 
 rule populate_qc:
     input:
