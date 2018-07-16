@@ -39,6 +39,7 @@ def downsample_vcf(num, inp='{input}', out='{output}'):
           ' | sort -k1,1 -k2,2n >> ' + out
 
 bcbio_copy_path = 'data/bcbio_test_project'
+bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 
 
 rule all:
@@ -47,7 +48,9 @@ rule all:
         expand('work_snake/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
-        expand(join(bcbio_copy_path, '.populated_{batch}.done'), batch=batch_by_name.keys()),
+        expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
+        join(bcbio_copy_path, '.populated_qc.done'),
+        join(bcbio_copy_final_dir, basename(run.date_dir), '.rsynced.done'),
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
         pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
@@ -251,25 +254,54 @@ rule index_bam:
 
 rule rsync_project:
     input:
-        project_ori_final = run.final_dir,
-        project_ori_config = run.config_dir
+        run.date_dir,
+        run.config_dir
     output:
-        project_copy = bcbio_copy_path
-    shell:
-        'rsync -tavz {input.project_ori_config} {output.project_copy}'
-        ' && rsync -tavz'
-        ' --exclude ".snakemake/"'
-        ' --exclude "umccrised/"'
-        ' --exclude "test/"'
-        ' --include "*/"'
-        ' --include "multiqc_report.html"'
-        ' --include "multiqc_list_files.txt"'
-        ' --include "multiqc_config.yaml"'
-        ' --include "multiqc_config.yaml"'
-        ' --include "data_versions.csv"'
-        ' --include "programs.txt"'
-        ' --exclude "*"'
-        ' {input.project_ori_final} {output.project_copy}'
+        project_copy = bcbio_copy_path,
+        marker = join(bcbio_copy_final_dir, basename(run.date_dir), '.rsynced.done')
+    run:
+        includes = [
+            "*/",
+            "data_versions.csv",
+            "programs.txt",
+        ]
+        includes_line = ''.join([f' --include {_f}' for _f in includes])
+        shell(
+            f'rsync -tavz {run.config_dir} {output.project_copy}'
+            f' && rsync -tavz'
+            f' --exclude ".snakemake/"'
+            f' --exclude "umccrised/"'
+            f' --exclude "test/"'
+            f'{includes_line}'
+            f' --exclude "*"'
+            f' {run.final_dir} {output.project_copy}'
+        )
+        shell('touch {output.marker}')
+
+
+mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
+qc_files = [line.strip() for line in open(mq_list_files) if line.strip()]
+inp_qc_files = [join(run.final_dir, qc_f) for qc_f in qc_files]
+out_qc_files = [join(bcbio_copy_final_dir, qc_f) for qc_f in qc_files]
+print(f'out_qc_files: ' + '\n'.join(out_qc_files))
+
+rule populate_qc:
+    input:
+        mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt'),
+        mq_yaml = join(run.date_dir, 'multiqc', 'multiqc_config.yaml'),
+        inp_qc_files = inp_qc_files
+    output:
+        mq_list_files = join(bcbio_copy_final_dir, basename(run.date_dir), 'multiqc', 'list_files_final.txt'),
+        mq_yaml= join(bcbio_copy_final_dir, basename(run.date_dir), 'multiqc', 'multiqc_config.yaml'),
+        out_qc_files = out_qc_files,
+        marker = bcbio_copy_path + '/.populated_qc.done'
+    run:
+        shell(f'cp {input.mq_list_files} {output.mq_list_files}')
+        shell(f'cp {input.mq_yaml} {output.mq_yaml}')
+        for i_f, o_f in zip(input.inp_qc_files, output.out_qc_files):
+            shell(f'cp {i_f} {o_f}')
+
+        shell('touch {output.marker}')
 
 
 rule populate_batch:
@@ -285,7 +317,7 @@ rule populate_batch:
         tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
         normal_bai = 'work_snake/{batch}_normal.bam.bai'
     output:
-        bcbio_copy_path + '/.populated_{batch}.done'
+        marker = bcbio_copy_path + '/.populated_batch_{batch}.done'
     run:
         batch = batch_by_name[wildcards.batch]
 
@@ -316,7 +348,7 @@ rule populate_batch:
         shell(f'cp {input.normal_bam} {normal_dir}/{normal_bam_name}')
         shell(f'cp {input.normal_bai} {normal_dir}/{normal_bam_name}.bai')
 
-        shell('touch {output}')
+        shell('touch {output.marker}')
 
 
 ######################################
