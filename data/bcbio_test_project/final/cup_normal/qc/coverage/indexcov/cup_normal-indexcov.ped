@@ -1,0 +1,2 @@
+#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	CNX	CNY	bins.out	bins.lo	bins.hi	bins.in	slope	p.out	mapped	unmapped
+unknown	cup_normal	-9	-9	2	-9	1.99	0.00	21325	11785	8294	154801	115.094	0.14	1641733982	3019107

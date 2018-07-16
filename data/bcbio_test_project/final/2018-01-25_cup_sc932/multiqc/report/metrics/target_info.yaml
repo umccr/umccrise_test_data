@@ -1,0 +1,6 @@
+coverage_bed_info: {bed: /data/cephfs/punim0010/projects/Grimmond_Patients/cup_sc932/work/bedprep/cov-ACMG56.bed,
+  genes: 56, regions: 56, size: 4980840}
+coverage_interval: genome
+genome_info: {name: GRCh37, size: 3101804739}
+variants_regions_info: {bed: /data/cephfs/punim0010/extras/GRCh37_noalt.bed, genes: 25,
+  regions: 25, size: 3095693981}
