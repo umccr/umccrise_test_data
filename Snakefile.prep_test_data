@@ -78,7 +78,7 @@ rule somatic_roi:
 #### GERMLINE ####
 rule downsample_germline:
     input:
-        lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-ensemble-annotated.vcf.gz')
+        lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-germline-ensemble-annotated.vcf.gz')
     output:
         'work_snake/germline/{batch}-germline-ensemble.vcf'
     shell:
@@ -320,7 +320,7 @@ rule populate_batch:
         somatic_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.name}-ensemble-annotated.vcf.gz')
         shell(f'bgzip -c {input.somatic_vcf} > {somatic_vcf} && tabix {somatic_vcf}')
 
-        germline_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.normal.name}-ensemble-annotated.vcf.gz')
+        germline_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.normal.name}-germline-ensemble-annotated.vcf.gz')
         shell(f'bgzip -c {input.germline_vcf} > {germline_vcf} && tabix {germline_vcf}')
 
         cnvkit_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize-cnvkit.vcf.gz')
