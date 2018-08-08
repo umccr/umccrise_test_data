@@ -4,7 +4,7 @@ from ngs_utils.bcbio import BcbioProject
 from os.path import join, abspath, relpath, basename
 from glob import glob
 from ngs_utils.file_utils import splitext_plus
-from umccrise import get_cancer_genes_ensg
+from ngs_utils.reference_data import get_cancer_genes_ensg
 
 
 shell.prefix('')  # Fixes Snakemake on Spartan
@@ -44,7 +44,6 @@ bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 
 rule all:
     input:
-        bcbio_copy_path,
         expand('work_snake/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
@@ -257,11 +256,12 @@ rule rsync_project:
         run.date_dir,
         run.config_dir
     output:
-        project_copy = bcbio_copy_path,
         marker = join(bcbio_copy_final_dir, basename(run.date_dir), '.rsynced.done')
+    params:
+        project_copy = bcbio_copy_path
     run:
         shell(
-            f'rsync -tavz {run.config_dir} {output.project_copy}'
+            f'rsync -tavz {run.config_dir} {params.project_copy}'
             f' && rsync -tavz'
             f' --exclude ".snakemake/"'
             f' --exclude "umccrised/"'
@@ -271,7 +271,7 @@ rule rsync_project:
             f' --include "programs.txt"'
             f' --include "multiqc_report.html"'
             f' --exclude "*"'
-            f' {run.final_dir} {output.project_copy}'
+            f' {run.final_dir} {params.project_copy}'
         )
         shell('touch {output.marker}')
 
