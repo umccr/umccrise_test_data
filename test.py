@@ -29,7 +29,7 @@ class Test_umccrise(BaseTestCase):
     results_dir = join(test_data_clone, BaseTestCase.results_dir)
     gold_standard_dir = join(test_data_clone, BaseTestCase.gold_standard_dir)
     try:
-        from python_utils import hpc
+        from hpc_utils import hpc
         loc = hpc.find_loc()
     except:  # When testing the dockerized version
         loc = None
