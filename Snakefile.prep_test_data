@@ -1,3 +1,4 @@
+import os
 import shutil
 import csv
 from ngs_utils.bcbio import BcbioProject
@@ -5,14 +6,17 @@ from os.path import join, abspath, relpath, basename
 from glob import glob
 from ngs_utils.file_utils import splitext_plus
 from ngs_utils.reference_data import get_cancer_genes_ensg
+from hpc_utils.hpc import get_ref_file
 
 
+shell.executable(os.environ.get('SHELL', 'bash'))
 shell.prefix('')  # Fixes Snakemake on Spartan
 
 
-Spa_HSAPIENS_DIR = '/data/cephfs/punim0010/local/stable/bcbio/genomes/Hsapiens'
-Spa_PON_DIR = '/data/cephfs/punim0010/extras/panel_of_normals'
-Spa_CANCER_GENES_ENSG = get_cancer_genes_ensg()
+genome = 'GRCh37'
+TRUTH_REGIONS = get_ref_file(genome, ['truth_sets', 'giab', 'bed'])
+PON_DIR = get_ref_file('GRCh37', key='panel_of_normals_dir')
+CANCER_GENES_ENSG = get_cancer_genes_ensg()
 
 Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
 run = BcbioProject(Spa_BCBIO_DIR)
@@ -27,7 +31,7 @@ SORT_SEED = "--random-source <(echo aaaaaaaaaaaaaaa)"
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
     return f'bcftools view -h {inp} > {out} && ' \
-           f'bcftools view -H {inp} | zgrep -f {Spa_CANCER_GENES_ENSG} >> {out}'
+           f'bcftools view -H {inp} | zgrep -f {CANCER_GENES_ENSG} >> {out}'
 
 def vcf_to_bed():
     return "bcftools view -H {input} | py -x \"'\\t'.join([x.split()[0], str(int(x.split()[1])-1), x.split()[1]])\"" \
@@ -351,7 +355,7 @@ rule populate_batch:
 #### Reference data ####
 rule prep_ref_data:
     input:
-        giab_regions = join(Spa_HSAPIENS_DIR, 'GRCh37/validation/giab-NA12878/truth_regions.bed'),
+        giab_regions = TRUTH_REGIONS,
         roi_bed = rules.project_roi.output[0]
     output:
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed'
@@ -371,7 +375,7 @@ rule project_somatic_roi:
 
 rule prep_pon_snps_vcf:
     input:
-        pon_vcf = join(Spa_PON_DIR, 'panel_of_normals.snps.vcf.gz'),
+        pon_vcf = join(PON_DIR, 'panel_of_normals.snps.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz')
@@ -381,7 +385,7 @@ rule prep_pon_snps_vcf:
 
 rule prep_pon_indels_vcf:
     input:
-        pon_vcf = join(Spa_PON_DIR, 'panel_of_normals.indels.vcf.gz'),
+        pon_vcf = join(PON_DIR, 'panel_of_normals.indels.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
