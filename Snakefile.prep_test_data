@@ -2,7 +2,7 @@ import os
 import shutil
 import csv
 from ngs_utils.bcbio import BcbioProject
-from os.path import join, abspath, relpath, basename
+from os.path import join, abspath, relpath, basename, isfile
 from glob import glob
 from ngs_utils.file_utils import splitext_plus
 from ngs_utils.reference_data import get_cancer_genes_ensg
@@ -18,15 +18,23 @@ TRUTH_REGIONS = get_ref_file(genome, ['truth_sets', 'giab', 'bed'])
 PON_DIR = get_ref_file('GRCh37', key='panel_of_normals_dir')
 CANCER_GENES_ENSG = get_cancer_genes_ensg()
 
-Spa_BCBIO_DIR = '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final'
-run = BcbioProject(Spa_BCBIO_DIR)
+# CWL: '/g/data/gx8/projects/Grimmond_Avner/2018-07-31T0309_Avner_WGS-merged/cromwell/final'
+BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final')
+run = BcbioProject(BCBIO_DIR)
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
 
-Out_PON_PATH = 'data/panel_of_normals'
-
-
 SORT_SEED = "--random-source <(echo aaaaaaaaaaaaaaa)"
+
+
+Out_PON_PATH = 'data/panel_of_normals'
+bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
+bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
+bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
+
+
+mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
+# if the file exists, we populate QC (because CWL output currently missing this file as longs as all qc)
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
@@ -42,8 +50,6 @@ def downsample_vcf(num, inp='{input}', out='{output}'):
            'bcftools view -H ' + inp + ' -f.,PASS | sort -R ' + SORT_SEED + ' | head -n' + str(num) + '' \
           ' | sort -k1,1 -k2,2n >> ' + out
 
-bcbio_copy_path = 'data/bcbio_test_project'
-bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 
 
 rule all:
@@ -52,8 +58,8 @@ rule all:
         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
         expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
-        join(bcbio_copy_path, '.populated_qc.done'),
-        join(bcbio_copy_final_dir, basename(run.date_dir), '.rsynced.done'),
+        join(bcbio_copy_path, '.populated_qc.done') if isfile(mq_list_files) else [],
+        join(bcbio_copy_date, '.rsynced.done'),
         giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
         pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
@@ -196,7 +202,7 @@ rule subset_bam:
     output:
         'work_snake/{batch}_{phenotype}.bam'
     shell:
-        '~/bin/sambamba slice {input.bam} -L {input.roi_bed} | sambamba sort -o {output} /dev/stdin'
+        'samtools view {input.bam} -L {input.roi_bed} -O bam | samtools sort -o {output} /dev/stdin'
 
 rule index_bam:
     input:
@@ -260,7 +266,7 @@ rule rsync_project:
         run.date_dir,
         run.config_dir
     output:
-        marker = join(bcbio_copy_final_dir, basename(run.date_dir), '.rsynced.done')
+        marker = join(bcbio_copy_date, '.rsynced.done')
     params:
         project_copy = bcbio_copy_path
     run:
@@ -280,28 +286,28 @@ rule rsync_project:
         shell('touch {output.marker}')
 
 
-mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
-qc_files = [line.strip() for line in open(mq_list_files) if line.strip()]
-inp_qc_files = [join(run.final_dir, qc_f) for qc_f in qc_files]
-out_qc_files = [join(bcbio_copy_final_dir, qc_f) for qc_f in qc_files]
+if isfile(mq_list_files):
+    qc_files = [line.strip() for line in open(mq_list_files) if line.strip()]
+    inp_qc_files = [join(run.final_dir, qc_f) for qc_f in qc_files]
+    out_qc_files = [join(bcbio_copy_final_dir, qc_f) for qc_f in qc_files]
 
-rule populate_qc:
-    input:
-        mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt'),
-        mq_yaml = join(run.date_dir, 'multiqc', 'multiqc_config.yaml'),
-        inp_qc_files = inp_qc_files
-    output:
-        mq_list_files = join(bcbio_copy_final_dir, basename(run.date_dir), 'multiqc', 'list_files_final.txt'),
-        mq_yaml= join(bcbio_copy_final_dir, basename(run.date_dir), 'multiqc', 'multiqc_config.yaml'),
-        out_qc_files = out_qc_files,
-        marker = bcbio_copy_path + '/.populated_qc.done'
-    run:
-        shell(f'cp {input.mq_list_files} {output.mq_list_files}')
-        shell(f'cp {input.mq_yaml} {output.mq_yaml}')
-        for i_f, o_f in zip(input.inp_qc_files, output.out_qc_files):
-            shell(f'cp {i_f} {o_f}')
+    rule populate_qc:
+        input:
+            mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt'),
+            mq_yaml = join(run.date_dir, 'multiqc', 'multiqc_config.yaml'),
+            inp_qc_files = inp_qc_files
+        output:
+            mq_list_files = join(bcbio_copy_date, 'multiqc', 'list_files_final.txt'),
+            mq_yaml= join(bcbio_copy_date, 'multiqc', 'multiqc_config.yaml'),
+            out_qc_files = out_qc_files,
+            marker = bcbio_copy_path + '/.populated_qc.done'
+        run:
+            shell(f'cp {input.mq_list_files} {output.mq_list_files}')
+            shell(f'cp {input.mq_yaml} {output.mq_yaml}')
+            for i_f, o_f in zip(input.inp_qc_files, output.out_qc_files):
+                shell(f'cp {i_f} {o_f}')
 
-        shell('touch {output.marker}')
+            shell('touch {output.marker}')
 
 
 rule populate_batch:

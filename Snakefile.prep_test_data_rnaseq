@@ -17,15 +17,15 @@ Rjn_HSAPIENS_DIR = '/g/data/gx8/local/development/bcbio/genomes/Hsapiens'
 Rjn_KEY_GENES = '/g/data3/gx8/extras/vlad/synced/umccr/umccrise/umccrise/ref_data/generated/key_genes.txt'
 Rjn_AZ300_BED = '/g/data3/gx8/extras/vlad/synced/umccr/umccrise/umccrise/ref_data/generated/key_genes.GRCh37.bed'
 
-Rjn_BCBIO_DIR = '/g/data3/gx8/extras/vlad/Analysis/bcbio_rnaseq/Tothill-CUP_WTS-merged/final'
-run = BcbioProject(Rjn_BCBIO_DIR)
+BCBIO_DIR = config.get('final', '/g/data3/gx8/extras/vlad/Analysis/bcbio_rnaseq/Tothill-CUP_WTS-merged/final')
+run = BcbioProject(BCBIO_DIR)
 sample_by_name = {s.name: s for s in run.samples}
 
 
 SORT_SEED = "--random-source <(echo aaaaaaaaaaaaaaa)"
 
 
-bcbio_copy_path = 'data/bcbio_test_project_rnaseq'
+bcbio_copy_path = config.get('out', 'data/bcbio_test_project_rnaseq')
 bcbio_copy_date = join(bcbio_copy_path, 'final', basename(run.date_dir))
 
 
