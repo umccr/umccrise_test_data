@@ -7,13 +7,16 @@ from nose.plugins.attrib import attr
 
 try:
     from ngs_utils.testing import BaseTestCase, info, check_call, vcf_ignore_lines, swap_output
-    from ngs_utils.utils import is_az, is_local, is_travis, is_spartan
+    from ngs_utils.utils import is_az, is_local, is_travis
     from ngs_utils.file_utils import safe_mkdir
     from ngs_utils.call_process import run_simple
+    from hpc_utils.hpc import find_loc
 except ImportError as e:
     traceback.print_exc()
-    sys.stderr.write('\nUmccrise is not installed. Refer to the README.md for installation\n')
+    sys.stderr.write('\nUmccrise is not installed properly. Refer to the README.md for installation\n')
     sys.exit(1)
+
+loc = find_loc()
 
 
 TUMORS = ['cup_tissue']
@@ -106,7 +109,7 @@ gunzip {ref_fasta_path}.gz''')
             failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/input/{key}-somatic.vcf.gz'                                  , vcf_ignore_lines, check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/input/{key}-somatic.vcf.gz.tbi'                              , check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/input/{key}-somatic-cna.tsv'                                                   )
-            if is_spartan():
+            if loc.name == 'spartan':
                 failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/{key}-somatic.pcgr_acmg.html'                            , check_diff=False)
                 failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/{key}-normal.pcgr_acmg.html'                             , check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{key}/{key}-rmd_report.html'                                            , check_diff=False)
