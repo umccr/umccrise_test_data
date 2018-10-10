@@ -55,18 +55,18 @@ gunzip {ref_fasta_path}.gz''')
 
         BaseTestCase.setUp(self)
 
-    def _run_umccrise(self, bcbio_dirname, parallel=False, docker=False, pcgr=False):
+    def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, pcgr=False):
         results_dir = join(self.results_dir, bcbio_dirname)
         bcbio_dir = join(self.data_dir, bcbio_dirname)
         cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3'
-        if not Test_umccrise.loc or docker:
+        if not Test_umccrise.loc or docker_wrapper_mode:
             cmdl += f' --bcbio-genomes {Test_umccrise.test_data_clone}/data/genomes'
             cmdl += f' --pon {Test_umccrise.test_data_clone}/data/panel_of_normals'
         if parallel:
             cmdl += ' -j 10'
-        if docker:
+        if docker_wrapper_mode:
             cmdl += ' --docker'
-        if pcgr and docker:
+        if pcgr and docker_wrapper_mode:
             cmdl += f' --pcgr-data {Test_umccrise.loc.pcgr_dir}/data'
         self._run_cmd(cmdl, bcbio_dir, results_dir)
         return results_dir
@@ -83,8 +83,9 @@ gunzip {ref_fasta_path}.gz''')
         return diff_failed
 
     @attr('normal')
-    def test(self, docker=False, pcgr=False):
-        results_dir = self._run_umccrise(bcbio_dirname='bcbio_test_project', parallel=False, docker=docker, pcgr=pcgr)
+    def test(self, docker_wrapper_mode=False, pcgr=False):
+        results_dir = self._run_umccrise(bcbio_dirname='bcbio_test_project', parallel=False,
+                                         docker_wrapper_mode=docker_wrapper_mode, pcgr=pcgr)
 
         failed = False
         failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-config/{PROJECT}-template.yaml'                                                 )
