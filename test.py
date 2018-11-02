@@ -6,7 +6,7 @@ import subprocess
 from nose.plugins.attrib import attr
 
 try:
-    from ngs_utils.testing import BaseTestCase, info, check_call, vcf_ignore_lines, swap_output
+    from ngs_utils.testing import BaseTestCase, echo, check_call, vcf_ignore_lines, swap_output
     from ngs_utils.utils import is_az, is_local, is_travis
     from ngs_utils.file_utils import safe_mkdir
     from ngs_utils.call_process import run_simple
@@ -44,7 +44,7 @@ class Test_umccrise(BaseTestCase):
         assert os.system(f'which {self.script}') == 0, 'Umccrise is not installed. Refer to the README.md for installation'
 
         if not Test_umccrise.loc or Test_umccrise.loc.name == 'travis':
-            info('Server is not recognized, downloaded the reference data')
+            echo('Server is not recognized, downloaded the reference data')
             ref_fasta_path = join(Test_umccrise.test_data_clone, 'data/genomes/Hsapiens/GRCh37/seq/GRCh37.fa')
             if not isfile(ref_fasta_path):
                 print('Downloading GRCh37 genome...')
