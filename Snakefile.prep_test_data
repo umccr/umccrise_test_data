@@ -15,7 +15,7 @@ shell.prefix('')  # Fixes Snakemake on Spartan
 
 genome = 'GRCh37'
 TRUTH_REGIONS = get_ref_file(genome, ['truth_sets', 'giab', 'bed'])
-PON_DIR = get_ref_file('GRCh37', key='panel_of_normals_dir')
+PON_DIR = get_ref_file(genome, key='panel_of_normals_dir')
 CANCER_GENES_ENSG = get_cancer_genes_ensg()
 
 # CWL: '/g/data/gx8/projects/Grimmond_Avner/2018-07-31T0309_Avner_WGS-merged/cromwell/final'
@@ -27,7 +27,7 @@ batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is
 SORT_SEED = "--random-source <(echo aaaaaaaaaaaaaaa)"
 
 
-Out_PON_PATH = 'data/panel_of_normals'
+Out_PON_PATH = f'data/genomes/panel_of_normals/{genome}'
 bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
@@ -60,7 +60,7 @@ rule all:
         expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
         join(bcbio_copy_path, '.populated_qc.done') if isfile(mq_list_files) else [],
         join(bcbio_copy_date, '.rsynced.done'),
-        giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed',
+        giab_regions = f'data/genomes/Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed',
         pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
 
@@ -364,7 +364,7 @@ rule prep_ref_data:
         giab_regions = TRUTH_REGIONS,
         roi_bed = rules.project_roi.output[0]
     output:
-        giab_regions = 'data/genomes/Hsapiens/GRCh37/validation/giab-NA12878/truth_regions.bed'
+        giab_regions = f'data/genomes/Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed'
     shell:
         'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output.giab_regions}'
 
