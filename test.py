@@ -129,6 +129,8 @@ gunzip {ref_fasta_path}.gz''')
             failed = self._check_file(failed, f'{results_dir}/{key}/structural/{key}-sv-prioritize-manta.ribbon.bed'                                    )
             failed = self._check_file(failed, f'{results_dir}/{key}/structural/{key}-sv-prioritize-manta-pass.tsv'                                      )
             failed = self._check_file(failed, f'{results_dir}/{key}/structural/{key}-sv-prioritize-manta.vcf'                         , vcf_ignore_lines)
+            failed = self._check_file(failed, f'{results_dir}/{key}/purple/{key}.purple.cnv'                                          , check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{key}/purple/{key}.purple.circos.png'                                   , check_diff=False)
 
         assert not failed, 'some of file checks have failed'
 
