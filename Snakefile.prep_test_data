@@ -14,12 +14,14 @@ shell.prefix('')  # Fixes Snakemake on Spartan
 
 
 genome = 'GRCh37'
-TRUTH_REGIONS = get_ref_file(genome, ['truth_sets', 'giab', 'bed'])
-PON_DIR = get_ref_file(genome, key='panel_of_normals_dir')
-CANCER_GENES_ENSG = get_cancer_genes_ensg()
+TRUTH_REGIONS      = get_ref_file(genome, ['truth_sets', 'giab', 'bed'])
+PURPLE_HET         = get_ref_file(genome, 'purple_het')
+PURPLE_GC          = get_ref_file(genome, 'purple_gc')
+PON_DIR            = get_ref_file(genome, 'panel_of_normals_dir')
+CANCER_GENES_ENSG  = get_cancer_genes_ensg()
 
 # CWL: '/g/data/gx8/projects/Grimmond_Avner/2018-07-31T0309_Avner_WGS-merged/cromwell/final'
-BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Patients/CUP_SC932/final')
+BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Patients/2018-01-25/final')
 run = BcbioProject(BCBIO_DIR)
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
@@ -60,9 +62,11 @@ rule all:
         expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
         join(bcbio_copy_path, '.populated_qc.done') if isfile(mq_list_files) else [],
         join(bcbio_copy_date, '.rsynced.done'),
-        giab_regions = f'data/genomes/Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed',
+        giab_regions = f'data/genomes/{genome}/truth_regions.bed',
+        purple_gc = f'data/genomes/{genome}/GC_profile.1000bp.cnp',
+        purple_het = f'data/genomes/{genome}/germline_het_pon.bed.gz',
         pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
-        pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
+        pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
 
 
 ######################################
@@ -364,9 +368,26 @@ rule prep_ref_data:
         giab_regions = TRUTH_REGIONS,
         roi_bed = rules.project_roi.output[0]
     output:
-        giab_regions = f'data/genomes/Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed'
+        f'data/genomes/{genome}/truth_regions.bed'
     shell:
         'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output.giab_regions}'
+
+rule prep_purple_gc:
+    input:
+        f = PURPLE_GC
+    output:
+        f'data/genomes/{genome}/GC_profile.1000bp.cnp'
+    shell:
+        'cp {input} {output}'
+
+rule prep_germline_het:
+    input:
+        f = PURPLE_HET,
+        roi_bed = rules.project_roi.output[0]
+    output:
+        f'data/genomes/{genome}/germline_het_pon.bed.gz'
+    shell:
+        'bedtools intersect -a {input.f} -b {input.roi_bed} | gzip -c > {output} && tabix -p bed {output}'
 
 
 ######################################
