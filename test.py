@@ -45,11 +45,13 @@ class Test_umccrise(BaseTestCase):
 
         if not Test_umccrise.loc or Test_umccrise.loc.name == 'travis':
             echo('Server is not recognized, downloaded the reference data')
-            ref_fasta_path = join(Test_umccrise.test_data_clone, 'data/genomes/GRCh37/GRCh37.fa')
+            ref_fasta_dir = join(Test_umccrise.test_data_clone, 'data/genomes/GRCh37')
+            ref_fasta_path = join(ref_fasta_dir, 'GRCh37.fa')
             if not isfile(ref_fasta_path):
                 print('Downloading GRCh37 genome...')
                 run_simple(f'''wget -nv --no-check-certificate -c https://s3.amazonaws.com/biodata/genomes/GRCh37-seq.tar.gz && 
-tar -xzvpf GRCh37-seq.tar.gz --directory {dirname(ref_fasta_path)} && 
+tar -xzvpf GRCh37-seq.tar.gz --directory {ref_fasta_path} && 
+mv {ref_fasta_path}/seq/* {ref_fasta_path}/ && 
 rm -f GRCh37-seq.tar.gz && 
 gunzip {ref_fasta_path}.gz''')
 
