@@ -378,7 +378,7 @@ rule prep_purple_gc:
     output:
         f'data/genomes/{genome}/GC_profile.1000bp.cnp'
     shell:
-        'head -n1000 {input} > {output}'
+        'cp {input} {output}'
 
 rule prep_germline_het:
     input:
