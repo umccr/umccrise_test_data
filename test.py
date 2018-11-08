@@ -55,7 +55,7 @@ gunzip {ref_fasta_path}.gz''')
 
         BaseTestCase.setUp(self)
 
-    def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, pcgr=False):
+    def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = join(self.results_dir, bcbio_dirname)
         bcbio_dir = join(self.data_dir, bcbio_dirname)
         cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3'
@@ -66,8 +66,10 @@ gunzip {ref_fasta_path}.gz''')
             cmdl += ' -j 10'
         if docker_wrapper_mode:
             cmdl += ' --docker'
-        if pcgr and docker_wrapper_mode:
+        if not skip_pcgr and docker_wrapper_mode:
             cmdl += f' --pcgr-data {Test_umccrise.loc.pcgr_dir}/data'
+        if skip_pcgr:
+            cmdl += ' --no-pcgr'
         self._run_cmd(cmdl, bcbio_dir, results_dir)
         return results_dir
 
@@ -83,9 +85,9 @@ gunzip {ref_fasta_path}.gz''')
         return diff_failed
 
     @attr('normal')
-    def test(self, docker_wrapper_mode=False, pcgr=False):
+    def test(self, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = self._run_umccrise(bcbio_dirname='bcbio_test_project', parallel=False,
-                                         docker_wrapper_mode=docker_wrapper_mode, pcgr=pcgr)
+                                         docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
 
         failed = False
         failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-config/{PROJECT}-template.yaml'                                                 )
@@ -110,7 +112,7 @@ gunzip {ref_fasta_path}.gz''')
             failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/input/{key}-somatic.vcf.gz'                                  , vcf_ignore_lines, check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/input/{key}-somatic.vcf.gz.tbi'                              , check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/input/{key}-somatic-cna.tsv'                                                   )
-            if loc.name == 'spartan':
+            if loc.name in ['spartan', 'raijin'] and not skip_pcgr:
                 failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/{key}-somatic.pcgr_acmg.html'                            , check_diff=False)
                 failed = self._check_file(failed, f'{results_dir}/{key}/pcgr/{key}-normal.pcgr_acmg.html'                             , check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{key}/{key}-rmd_report.html'                                            , check_diff=False)
@@ -133,11 +135,15 @@ gunzip {ref_fasta_path}.gz''')
 
         assert not failed, 'some of file checks have failed'
 
-    @attr('docker')
-    def test_docker(self):
-        self.test(docker=True)
+    # @attr('skip_pcgr')
+    # def test_no_pcgr(self):
+    #     self.test(skip_pcgr=True)
 
-    @attr('docker_with_pcgr')
-    def test_docker(self):
-        self.test(docker=True, pcgr=True)
+    # @attr('docker')
+    # def test_docker(self):
+    #     self.test(docker=True, pcgr=False)
+    #
+    # @attr('docker_with_pcgr')
+    # def test_docker(self):
+    #     self.test(docker=True, pcgr=True)
 
