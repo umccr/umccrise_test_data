@@ -45,11 +45,11 @@ class Test_umccrise(BaseTestCase):
 
         if not Test_umccrise.loc or Test_umccrise.loc.name == 'travis':
             echo('Server is not recognized, downloaded the reference data')
-            ref_fasta_path = join(Test_umccrise.test_data_clone, 'data/genomes/Hsapiens/GRCh37/seq/GRCh37.fa')
+            ref_fasta_path = join(Test_umccrise.test_data_clone, 'data/genomes/GRCh37/GRCh37.fa')
             if not isfile(ref_fasta_path):
                 print('Downloading GRCh37 genome...')
                 run_simple(f'''wget -nv --no-check-certificate -c https://s3.amazonaws.com/biodata/genomes/GRCh37-seq.tar.gz && 
-tar -xzvpf GRCh37-seq.tar.gz --directory {Test_umccrise.test_data_clone}/data/genomes/Hsapiens/GRCh37 && 
+tar -xzvpf GRCh37-seq.tar.gz --directory {dirname(ref_fasta_path)} && 
 rm -f GRCh37-seq.tar.gz && 
 gunzip {ref_fasta_path}.gz''')
 
@@ -63,11 +63,11 @@ gunzip {ref_fasta_path}.gz''')
             cmdl += f' --bcbio-genomes {Test_umccrise.test_data_clone}/data/genomes'
             cmdl += f' --pon {Test_umccrise.test_data_clone}/data/panel_of_normals'
         if parallel:
-            cmdl += ' -j 10'
+            cmdl += ' -j10'
         if docker_wrapper_mode:
             cmdl += ' --docker'
         if not skip_pcgr and docker_wrapper_mode:
-            cmdl += f' --pcgr-data {Test_umccrise.loc.pcgr_dir}/data'
+            cmdl += f' --pcgr-data {Test_umccrise.loc.pcgr_data}'
         if skip_pcgr:
             cmdl += ' --no-pcgr'
         self._run_cmd(cmdl, bcbio_dir, results_dir)
