@@ -97,6 +97,6 @@ work_snake/
 results/
 .snakemake
 data.bak/
-data/genomes/Hsapiens/GRCh37/seq
-
+data/genomes/GRCh37/GRCh37.fa*
+data/genomes/GRCh37/GRCh37.dict
 data/pcgr/

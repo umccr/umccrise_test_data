@@ -370,7 +370,7 @@ rule prep_ref_data:
     output:
         f'data/genomes/{genome}/truth_regions.bed'
     shell:
-        'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output.giab_regions}'
+        'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output}'
 
 rule prep_purple_gc:
     input:
@@ -378,7 +378,7 @@ rule prep_purple_gc:
     output:
         f'data/genomes/{genome}/GC_profile.1000bp.cnp'
     shell:
-        'cp {input} {output}'
+        'head -n1000 {input} > {output}'
 
 rule prep_germline_het:
     input:
@@ -387,7 +387,7 @@ rule prep_germline_het:
     output:
         f'data/genomes/{genome}/germline_het_pon.bed.gz'
     shell:
-        'bedtools intersect -a {input.f} -b {input.roi_bed} | gzip -c > {output} && tabix -p bed {output}'
+        'bedtools intersect -a {input.f} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
 
 
 ######################################
