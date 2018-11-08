@@ -50,8 +50,8 @@ class Test_umccrise(BaseTestCase):
             if not isfile(ref_fasta_path):
                 print('Downloading GRCh37 genome...')
                 run_simple(f'''wget -nv --no-check-certificate -c https://s3.amazonaws.com/biodata/genomes/GRCh37-seq.tar.gz && 
-tar -xzvpf GRCh37-seq.tar.gz --directory {ref_fasta_path} && 
-mv {ref_fasta_path}/seq/* {ref_fasta_path}/ && 
+tar -xzvpf GRCh37-seq.tar.gz --directory {ref_fasta_dir} && 
+mv {ref_fasta_dir}/seq/* {ref_fasta_dir}/ && 
 rm -f GRCh37-seq.tar.gz && 
 gunzip {ref_fasta_path}.gz''')
 
