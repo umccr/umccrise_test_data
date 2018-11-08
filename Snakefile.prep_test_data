@@ -29,7 +29,7 @@ batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is
 SORT_SEED = "--random-source <(echo aaaaaaaaaaaaaaa)"
 
 
-Out_PON_PATH = f'data/genomes/panel_of_normals/{genome}'
+Out_PON_PATH = f'data/genomes/{genome}/panel_of_normals'
 bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
