@@ -1,0 +1,10 @@
+QCStatus	FAIL_GENDER
+SegmentPass	true
+GenderPass	false
+DeletedGenesPass	false
+SegmentScore	1
+UnsupportedSegments	4
+Ploidy	3.9861
+AmberGender	MALE
+CobaltGender	FEMALE
+DeletedGenes	1809
