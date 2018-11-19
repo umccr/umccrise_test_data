@@ -60,10 +60,9 @@ gunzip {ref_fasta_path}.gz''')
     def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = join(self.results_dir, bcbio_dirname)
         bcbio_dir = join(self.data_dir, bcbio_dirname)
-        cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3'
+        cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3 --restart-times 0'
         if not Test_umccrise.loc or docker_wrapper_mode:
-            cmdl += f' --bcbio-genomes {Test_umccrise.test_data_clone}/data/genomes'
-            cmdl += f' --pon {Test_umccrise.test_data_clone}/data/panel_of_normals'
+            cmdl += f' --genomes {Test_umccrise.test_data_clone}/data/genomes'
         if parallel:
             cmdl += ' -j10'
         if docker_wrapper_mode:
