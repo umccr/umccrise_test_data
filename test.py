@@ -60,7 +60,7 @@ gunzip {ref_fasta_path}.gz''')
     def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = join(self.results_dir, bcbio_dirname)
         bcbio_dir = join(self.data_dir, bcbio_dirname)
-        cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3 --restart-times 0'
+        cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3'
         if not Test_umccrise.loc or docker_wrapper_mode:
             cmdl += f' --genomes {Test_umccrise.test_data_clone}/data/genomes'
         if parallel:
@@ -103,7 +103,8 @@ gunzip {ref_fasta_path}.gz''')
             failed = self._check_file(failed, f'{results_dir}/{batch}/igv/{batch}-roi.bed', check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{batch}/pcgr/{batch}-somatic.pcgr.html', check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{batch}/pcgr/{batch}-normal.cpsr.html', check_diff=False)
-            failed = self._check_file(failed, f'{results_dir}/{batch}/{batch}-rmd_report.html', check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/{batch}_book/purple-results.html', check_diff=False)
+            failed = self._check_file(failed, f'{results_dir}/{batch}/{batch}_book/index.html', check_diff=False)
             failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta.bedpe')
             failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta.ribbon.bed')
             failed = self._check_file(failed, f'{results_dir}/{batch}/structural/{batch}-sv-prioritize-manta-pass.tsv')
