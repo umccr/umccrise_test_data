@@ -103,3 +103,5 @@ data/pcgr/
 
 data/genomes/GRCh37/GRCh37_tricky.bed.gz*
 data/genomes/GRCh37/gnomad_genome.vcf.gz*
+
+.*.done
