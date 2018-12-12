@@ -33,6 +33,7 @@ if include_names:
 BCBIO_DIR = config.get('final', '/g/data3/gx8/projects/Hofmann_Avner/2018-11-30T1125_Avner_WGS-merged/final')
 run = BcbioProject(BCBIO_DIR, include_samples=include_names)
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
+print(batch_by_name)
 
 
 SORT_SEED = "--random-source <(echo QUERTY)"
@@ -50,7 +51,7 @@ mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
-    return f'bcftools view -r <(head -n100 {KEY_GENES_BED}) {inp} > {out}'
+    return f'bcftools view -R <(head -n100 {KEY_GENES_BED}) {inp} > {out} && grep -v ^# {out} | wc'
 
 def vcf_to_bed():
     return "bcftools view -H {input} | py -x \"'\\t'.join([x.split()[0], str(int(x.split()[1])-1), x.split()[1]])\"" \
@@ -232,7 +233,7 @@ rule subset_bam:
     output:
         'work_snake/{batch}_{phenotype}.bam'
     shell:
-        'samtools view {input.bam} -L {input.roi_bed} -O bam | samtools sort -o {output} /dev/stdin'
+        '~/bin/sambamba slice {input.bam} -L {input.roi_bed} | samtools sort -Obam -o {output} /dev/stdin'
 
 rule index_bam:
     input:
@@ -300,12 +301,18 @@ rule rsync_project:
     params:
         project_copy = bcbio_copy_path
     run:
+        exclude_samples = ''
+        if include_names:
+            included = [s.name for s in run.samples]
+            exclude_samples = [s.name for s in BcbioProject(BCBIO_DIR, exclude_samples=included).samples]
+            exclude_samples = ' '.join(f'--exclude {sn}' for sn in exclude_samples)
         shell(
             f'rsync -tavz {run.config_dir} {params.project_copy}'
             f' && rsync -tavz'
             f' --exclude ".snakemake/"'
             f' --exclude "umccrised/"'
             f' --exclude "test/"'
+            f' {exclude_samples}'
             f' --include "*/"'
             f' --include "data_versions.csv"'
             f' --include "programs.txt"'
@@ -337,7 +344,9 @@ if isfile(mq_list_files):
             shell(f'cp {input.mq_yaml} {output.mq_yaml}')
             for i_f, o_f in zip(input.inp_qc_files, output.out_qc_files):
                 shell(f'cp {i_f} {o_f}')
-
+            with open(output.mq_list_files, 'w') as out:
+                for qf in qc_files:
+                    out.write(qf + '\n')
             shell('touch {output.marker}')
 
 
@@ -352,6 +361,7 @@ rule populate_batch:
         tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
         normal_bai = 'work_snake/{batch}_normal.bam.bai',
         purple = 'work_snake/work/.{batch}.done',
+        synced = join(bcbio_copy_date, '.rsynced.done'),
     output:
         marker = bcbio_copy_path + '/.populated_batch_{batch}.done'
     params:
