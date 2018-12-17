@@ -1,10 +1,13 @@
 import os
 import shutil
 import csv
+
+import yaml
+
 from ngs_utils.bcbio import BcbioProject
 from os.path import join, abspath, relpath, basename, isfile, dirname
 from glob import glob
-from ngs_utils.file_utils import splitext_plus
+from ngs_utils.file_utils import splitext_plus, safe_mkdir
 from ngs_utils.reference_data import get_key_genes_bed
 from hpc_utils.hpc import get_ref_file
 from ngs_utils.utils import flatten
@@ -32,11 +35,12 @@ if include_names:
 # BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Patients/2018-01-25/final')
 BCBIO_DIR = config.get('final', '/g/data3/gx8/projects/Hofmann_Avner/2018-11-30T1125_Avner_WGS-merged/final')
 run = BcbioProject(BCBIO_DIR, include_samples=include_names)
+included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 print(batch_by_name)
 
 
-SORT_SEED = "--random-source <(echo QUERTY)"
+SORT_SEED = "--random-source <(echo AAAAAAAAAAAAAAAAAAA)"
 
 
 Out_PON_PATH = f'data/genomes/{genome}/panel_of_normals'
@@ -51,7 +55,7 @@ mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
-    return f'bcftools view -R <(head -n100 {KEY_GENES_BED}) {inp} > {out} && grep -v ^# {out} | wc'
+    return f'bcftools view -R {KEY_GENES_BED} {inp} > {out} && grep -v ^# {out} | wc'
 
 def vcf_to_bed():
     return "bcftools view -H {input} | py -x \"'\\t'.join([x.split()[0], str(int(x.split()[1])-1), x.split()[1]])\"" \
@@ -60,7 +64,7 @@ def vcf_to_bed():
 def downsample_vcf(num, inp='{input}', out='{output}'):
     return 'bcftools view -h ' + inp + ' > ' + out + ' && ' \
            'bcftools view -H ' + inp + ' -f.,PASS | sort -R ' + SORT_SEED + ' | head -n' + str(num) + '' \
-          ' | sort -k1,1 -k2,2n >> ' + out
+          ' | sort -k1,1V -k2,2n >> ' + out
 
 
 
@@ -154,18 +158,14 @@ rule germline_roi:
 ##### Purple #####
 rule copy_purple:
     input:
-        bcbio_amber_dir  = directory(lambda wc: join(run.work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/amber')),
-        bcbio_cobalt_dir = directory(lambda wc: join(run.work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/cobalt')),
+        bcbio_amber_dir  = directory(join(run.work_dir, 'structural/{name}/purple/amber')),
+        bcbio_cobalt_dir = directory(join(run.work_dir, 'structural/{name}/purple/cobalt')),
     output:
-        touch(temp('work_snake/work/.{batch}.done')),
-    params:
-        amber_dir  = lambda wc: directory(f'work_snake/work/structural/{batch_by_name[wc.batch].tumor.name}/purple/amber'),
-        cobalt_dir = lambda wc: directory(f'work_snake/work/structural/{batch_by_name[wc.batch].tumor.name}/purple/cobalt'),
+        amber_dir  = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/amber')),
+        cobalt_dir = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/cobalt')),
     run:
-        shell('mkdir -p ' + dirname(params.amber_dir))
-        shell('mkdir -p ' + dirname(params.cobalt_dir))
-        shell('cp -r {input.bcbio_amber_dir} {params.amber_dir}')
-        shell('cp -r {input.bcbio_cobalt_dir} {params.cobalt_dir}')
+        shell('cp -r {input.bcbio_amber_dir}  $(dirname {output.amber_dir})')
+        shell('cp -r {input.bcbio_cobalt_dir} $(dirname {output.cobalt_dir})')
 
 
 ######################################
@@ -299,16 +299,20 @@ rule rsync_project:
     output:
         marker = join(bcbio_copy_date, '.rsynced.done')
     params:
-        project_copy = bcbio_copy_path
+        project_copy = bcbio_copy_path,
     run:
         exclude_samples = ''
-        if include_names:
-            included = [s.name for s in run.samples]
-            exclude_samples = [s.name for s in BcbioProject(BCBIO_DIR, exclude_samples=included).samples]
-            exclude_samples = ' '.join(f'--exclude {sn}' for sn in exclude_samples)
+        safe_mkdir(join(params.project_copy, 'config'))
+        exclude_samples = [s.name for s in BcbioProject(BCBIO_DIR, exclude_samples=included_names).samples]
+        exclude_samples = ' '.join(f'--exclude {sn}' for sn in exclude_samples)
+        new_yaml = join(params.project_copy, 'config', basename(run.bcbio_yaml_fpath))
+        with open(run.bcbio_yaml_fpath) as inp, open(new_yaml, 'w') as out:
+            data = yaml.load(inp)
+            data['details'] = [d for d in data['details'] if d['description'] in included_names]
+            yaml.dump(data, out)
+
         shell(
-            f'rsync -tavz {run.config_dir} {params.project_copy}'
-            f' && rsync -tavz'
+            f'rsync -tavz'
             f' --exclude ".snakemake/"'
             f' --exclude "umccrised/"'
             f' --exclude "test/"'
@@ -325,7 +329,7 @@ rule rsync_project:
 
 if isfile(mq_list_files):
     qc_files = [line.strip() for line in open(mq_list_files)
-                if line.strip() and line.strip() != 'trimmed' and not include_names or any(sn in line for sn in include_names)]
+                if line.strip() and line.strip() != 'trimmed' and any(sn in line for sn in included_names)]
     inp_qc_files = [join(run.final_dir, qc_f) for qc_f in qc_files]
     out_qc_files = [join(bcbio_copy_final_dir, qc_f) for qc_f in qc_files]
 
@@ -360,12 +364,11 @@ rule populate_batch:
         normal_bam = 'work_snake/{batch}_normal.bam',
         tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
         normal_bai = 'work_snake/{batch}_normal.bam.bai',
-        purple = 'work_snake/work/.{batch}.done',
+        amber_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/amber')),
+        cobalt_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/cobalt')),
         synced = join(bcbio_copy_date, '.rsynced.done'),
     output:
         marker = bcbio_copy_path + '/.populated_batch_{batch}.done'
-    params:
-        work_dir = 'work_snake/work',
     run:
         batch = batch_by_name[wildcards.batch]
 
@@ -389,7 +392,6 @@ rule populate_batch:
         shell(f'cp {input.tumor_bai} {tumor_dir}/{tumor_bam_name}.bai')
         shell(f'cp {input.normal_bam} {normal_dir}/{normal_bam_name}')
         shell(f'cp {input.normal_bai} {normal_dir}/{normal_bam_name}.bai')
-        shell(f'cp -r {params.work_dir} ' + bcbio_copy_work_dir)
 
         shell('touch {output.marker}')
 
