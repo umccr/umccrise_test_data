@@ -1,0 +1,90 @@
+details:
+- algorithm:
+    adapters: polyx
+    aligner: bwa
+    coverage: /g/data3/gx8/extras/umccr_cancer_genes.v1.GRCh37.bed
+    ensemble: {numpass: 2}
+    mark_duplicates: true
+    maxcov_downsample: false
+    min_allele_fraction: 1
+    mixup_check: qsignature
+    realign: false
+    recalibrate: false
+    remove_lcr: false
+    svcaller: [manta, purple]
+    svprioritize: cancer/az300
+    tools_on: [break-point-inspector, noalt_calling]
+    trim_reads: atropos
+    variant_regions: /g/data/gx8/extras/GRCh37_noalt.bed
+    variantcaller:
+      germline: [vardict, strelka2, gatk-haplotype]
+      somatic: [vardict, strelka2, mutect2]
+  analysis: variant2
+  description: CCR180074_WH18B001P017
+  files: [/g/data3/gx8/projects/Hofmann_Avner/data/merged/CCR180074_WH18B001P017_R1.fastq.gz,
+    /g/data3/gx8/projects/Hofmann_Avner/data/merged/CCR180074_WH18B001P017_R2.fastq.gz]
+  genome_build: GRCh37
+  metadata:
+    batch: [2016.249.18.WH.P017_1, 2016.249.18.WH.P017_2]
+    family_id: 2016.249.18.WH.P017
+    individual_id: 2016.249.18.WH.P017
+    phenotype: normal
+- algorithm:
+    adapters: polyx
+    aligner: bwa
+    coverage: /g/data3/gx8/extras/umccr_cancer_genes.v1.GRCh37.bed
+    ensemble: {numpass: 2}
+    mark_duplicates: true
+    maxcov_downsample: false
+    min_allele_fraction: 1
+    mixup_check: qsignature
+    realign: false
+    recalibrate: false
+    remove_lcr: false
+    svcaller: [manta, purple]
+    svprioritize: cancer/az300
+    tools_on: [break-point-inspector, noalt_calling]
+    trim_reads: atropos
+    variant_regions: /g/data/gx8/extras/GRCh37_noalt.bed
+    variantcaller:
+      germline: [vardict, strelka2, gatk-haplotype]
+      somatic: [vardict, strelka2, mutect2]
+  analysis: variant2
+  description: CCR180075_WH18T002P017
+  files: [/g/data3/gx8/projects/Hofmann_Avner/data/merged/CCR180075_WH18T002P017_R1.fastq.gz,
+    /g/data3/gx8/projects/Hofmann_Avner/data/merged/CCR180075_WH18T002P017_R2.fastq.gz]
+  genome_build: GRCh37
+  metadata: {batch: 2016.249.18.WH.P017_1, family_id: 2016.249.18.WH.P017, individual_id: 2016.249.18.WH.P017,
+    phenotype: tumor}
+- algorithm:
+    adapters: polyx
+    aligner: bwa
+    coverage: /g/data3/gx8/extras/umccr_cancer_genes.v1.GRCh37.bed
+    ensemble: {numpass: 2}
+    mark_duplicates: true
+    maxcov_downsample: false
+    min_allele_fraction: 1
+    mixup_check: qsignature
+    realign: false
+    recalibrate: false
+    remove_lcr: false
+    svcaller: [manta, purple]
+    svprioritize: cancer/az300
+    tools_on: [break-point-inspector, noalt_calling]
+    trim_reads: atropos
+    variant_regions: /g/data/gx8/extras/GRCh37_noalt.bed
+    variantcaller:
+      germline: [vardict, strelka2, gatk-haplotype]
+      somatic: [vardict, strelka2, mutect2]
+  analysis: variant2
+  description: CCR180159_VPT-WH017A
+  files: [/g/data3/gx8/projects/Hofmann_Avner/data/merged/CCR180159_VPT-WH017A_R1.fastq.gz,
+    /g/data3/gx8/projects/Hofmann_Avner/data/merged/CCR180159_VPT-WH017A_R2.fastq.gz]
+  genome_build: GRCh37
+  metadata: {batch: 2016.249.18.WH.P017_2, family_id: 2016.249.18.WH.P017, individual_id: 2016.249.18.WH.P017,
+    phenotype: tumor}
+fc_name: 2018-11-30T1125_Avner_WGS-merged
+resources:
+  default: {cores: 16, memory: 3G}
+  machine: {cores: 16, memory: 128}
+upload: {dir: ../final}

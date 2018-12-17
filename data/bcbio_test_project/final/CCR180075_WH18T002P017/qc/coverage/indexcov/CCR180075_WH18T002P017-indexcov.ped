@@ -1,0 +1,2 @@
+#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	CNX	CNY	bins.out	bins.lo	bins.hi	bins.in	slope	p.out	mapped	unmapped
+unknown	CCR180075_WH18T002P017	-9	-9	1	-9	1.05	1.06	54841	11796	11815	121285	90.409	0.45	1781722456	3106222

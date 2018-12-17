@@ -1,0 +1,2 @@
+sample_id,depth_outlier,het_count,het_ratio,idr_baf,mean_depth,median_depth,p10,p90,sampled_sites,call_rate,PC1,PC2,PC3,PC4,ancestry-prediction,ancestry-prob
+CCR180159_VPT-WH017A,False,4053,0.6859,0.2153,73.43,72,0.3612,0.5764,5892,1,-0.7488,-1.525,-0.4155,-1.091,EUR,0.9975
