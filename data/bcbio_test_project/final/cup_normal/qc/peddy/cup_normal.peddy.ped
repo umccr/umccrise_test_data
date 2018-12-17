@@ -1,2 +1,0 @@
-#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	Ethnicity	het_call_rate	het_ratio	het_mean_depth	het_idr_baf	ancestry-prediction	PC1	PC2	PC3	sex_het_ratio	sex_fixed
-cup_normal	cup_normal	-9	-9	0	0	-9	1	0.6421	75.54	0.1552	EUR	-0.3751	-1.777	0.3337	1.693	True
