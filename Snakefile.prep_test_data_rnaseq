@@ -77,7 +77,7 @@ rule subset_bam:
     params:
         sort_prefix = 'snake_work/{sample}/sort_prefix'
     threads:
-        threads_max // len(sample_by_name)
+        threads_max
     shell:
         'samtools view -@ {threads} {input.bam} -L {input.roi_bed} -h | '
         'samtools sort -@ {threads} -T {params.sort_prefix} -O bam -o {output}'
