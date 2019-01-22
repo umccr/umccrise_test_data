@@ -32,8 +32,9 @@ if include_names:
 
 
 # CWL: '/g/data/gx8/projects/Grimmond_Avner/2018-07-31T0309_Avner_WGS-merged/cromwell/final'
-# BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Patients/2018-01-25/final')
-BCBIO_DIR = config.get('final', '/g/data3/gx8/projects/Hofmann_Avner/2018-11-30T1125_Avner_WGS-merged/final')
+BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Avner/2018-12-05/final')
+include_names = ['CCR180074_WH18B001P017', 'CCR180075_WH18T002P017', 'CCR180159_VPT-WH017A']
+# BCBIO_DIR = config.get('final', '/g/data3/gx8/projects/Hofmann_Avner/2018-11-30T1125_Avner_WGS-merged/final')
 run = BcbioProject(BCBIO_DIR, include_samples=include_names)
 included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
@@ -127,45 +128,18 @@ rule germline_roi:
     shell:
         vcf_to_bed()
 
-# ######################################
-# #### CNVKIT ####
-# rule downsample_cnvkit:
+# ##################
+# ##### Purple #####
+# rule copy_purple:
 #     input:
-#         lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize-cnvkit.vcf.gz')
+#         bcbio_amber_dir  = directory(join(run.work_dir, 'structural/{name}/purple/amber')),
+#         bcbio_cobalt_dir = directory(join(run.work_dir, 'structural/{name}/purple/cobalt')),
 #     output:
-#         'work_snake/sv/{batch}-cnvkit.vcf'
-#     shell:
-#         downsample_vcf(10)
-#
-# rule cnvkit_roi:
-#     input:
-#         rules.downsample_cnvkit.output[0]
-#     output:
-#         'work_snake/sv/{batch}-cnvkit.bed'
-#     shell:
-#         vcf_to_bed()
-#
-# rule downsample_cnvkit_cns:
-#     input:
-#         lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-cnvkit-call.cns')
-#     output:
-#         'work_snake/sv/{batch}-cnvkit-call.cns'
-#     shell:
-#         'head -n1 {input} > {output} && '
-#         'cat {input} | sort -R ' + SORT_SEED + ' | head -n10 | sort -k1,1 -k2,2n >> {output}'
-
-##################
-##### Purple #####
-rule copy_purple:
-    input:
-        bcbio_amber_dir  = directory(join(run.work_dir, 'structural/{name}/purple/amber')),
-        bcbio_cobalt_dir = directory(join(run.work_dir, 'structural/{name}/purple/cobalt')),
-    output:
-        amber_dir  = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/amber')),
-        cobalt_dir = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/cobalt')),
-    run:
-        shell('cp -r {input.bcbio_amber_dir}  $(dirname {output.amber_dir})')
-        shell('cp -r {input.bcbio_cobalt_dir} $(dirname {output.cobalt_dir})')
+#         amber_dir  = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/amber')),
+#         cobalt_dir = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/cobalt')),
+#     run:
+#         shell('cp -r {input.bcbio_amber_dir}  $(dirname {output.amber_dir})')
+#         shell('cp -r {input.bcbio_cobalt_dir} $(dirname {output.cobalt_dir})')
 
 
 ######################################
@@ -201,7 +175,7 @@ rule downsample_sv_prioritize:
 rule batch_roi:
     input:
         rules.somatic_roi.output[0],
-        rules.germline_roi.output[0],
+        rules.germline_roi.output[0]
     output:
         'work_snake/{batch}-roi.bed'
     shell:
@@ -218,9 +192,18 @@ rule batch_roi:
 #         with open(output[0], 'w') as out:
 #             out.write(sex_bed)
 
+rule conpair_roi:
+    input:
+        'data/conpair_markers/GRCh37.bed' if genome == 'GRCh37' else 'data/conpair_markers/hg38.bed'
+    output:
+        'work_snake/conpair_roi.bed'
+    shell:
+        'head -n100 {input} > {output}'
+
 rule project_roi:
     input:
-        expand(rules.batch_roi.output[0], batch=batch_by_name.keys())
+        expand(rules.batch_roi.output[0], batch=batch_by_name.keys()),
+        rules.conpair_roi.output[0]
     output:
         'work_snake/roi.bed'
     shell:
@@ -364,8 +347,8 @@ rule populate_batch:
         normal_bam = 'work_snake/{batch}_normal.bam',
         tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
         normal_bai = 'work_snake/{batch}_normal.bam.bai',
-        amber_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/amber')),
-        cobalt_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/cobalt')),
+        # amber_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/amber')),
+        # cobalt_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/cobalt')),
         synced = join(bcbio_copy_date, '.rsynced.done'),
     output:
         marker = bcbio_copy_path + '/.populated_batch_{batch}.done'
