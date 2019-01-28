@@ -17,12 +17,7 @@ shell.executable(os.environ.get('SHELL', 'bash'))
 shell.prefix('')  # Fixes Snakemake on Spartan
 
 
-genome = 'GRCh37'
-TRUTH_REGIONS      = get_ref_file(genome, ['truth_sets', 'giab', 'bed'])
-PURPLE_HET         = get_ref_file(genome, 'purple_het')
-PURPLE_GC          = get_ref_file(genome, 'purple_gc')
-PON_DIR            = get_ref_file(genome, 'panel_of_normals_dir')
-KEY_GENES_BED      = get_key_genes_bed(genome)
+GENOME = 'GRCh37'
 
 
 include_names = config.get('sample')
@@ -44,7 +39,7 @@ print(batch_by_name)
 SORT_SEED = "--random-source <(echo AAAAAAAAAAAAAAAAAAA)"
 
 
-Out_PON_PATH = f'data/genomes/{genome}/panel_of_normals'
+Out_PON_PATH = f'data/genomes/{GENOME}/panel_of_normals'
 bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_work_dir = join(bcbio_copy_path, 'work')
@@ -56,7 +51,8 @@ mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
-    return f'bcftools view -R {KEY_GENES_BED} {inp} > {out} && grep -v ^# {out} | wc'
+    key_genes_bed = get_key_genes_bed(GENOME)
+    return f'bcftools view -R {key_genes_bed} {inp} > {out} && grep -v ^# {out} | wc'
 
 def vcf_to_bed():
     return "bcftools view -H {input} | py -x \"'\\t'.join([x.split()[0], str(int(x.split()[1])-1), x.split()[1]])\"" \
@@ -77,11 +73,14 @@ rule all:
         expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
         join(bcbio_copy_path, '.populated_qc.done') if isfile(mq_list_files) else [],
         join(bcbio_copy_date, '.rsynced.done'),
-        giab_regions = f'data/genomes/{genome}/truth_regions.bed',
-        purple_gc = f'data/genomes/{genome}/GC_profile.1000bp.cnp',
-        purple_het = f'data/genomes/{genome}/germline_het_pon.bed.gz',
-        pon_snps_vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
+        pon_snps_vcf   = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
+        gnomad          = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz',
+        purple_gc       = f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp',
+        purple_het      = f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz',
+        hmf_hotspot     = f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz',
+        hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz',
+        hmf_mappability = f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz',
 
 
 ######################################
@@ -194,7 +193,7 @@ rule batch_roi:
 
 rule conpair_roi:
     input:
-        'data/conpair_markers/GRCh37.bed' if genome == 'GRCh37' else 'data/conpair_markers/hg38.bed'
+        'data/conpair_markers/GRCh37.bed' if GENOME == 'GRCh37' else 'data/conpair_markers/hg38.bed'
     output:
         'work_snake/conpair_roi.bed'
     shell:
@@ -206,6 +205,14 @@ rule project_roi:
         rules.conpair_roi.output[0]
     output:
         'work_snake/roi.bed'
+    shell:
+        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+
+rule project_somatic_roi:
+    input:
+        expand(rules.somatic_roi.output[0], batch=batch_by_name.keys())
+    output:
+        'work_snake/somatic_roi.bed'
     shell:
         'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
 
@@ -381,46 +388,65 @@ rule populate_batch:
 
 ######################################
 #### Reference data ####
-rule prep_ref_data:
+rule prep_gnomad:
     input:
-        giab_regions = TRUTH_REGIONS,
-        roi_bed = rules.project_roi.output[0]
+        vcf = get_ref_file(GENOME, 'gnomad'),
+        somatic_roi = rules.project_somatic_roi.output[0]
     output:
-        f'data/genomes/{genome}/truth_regions.bed'
+        vcf = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz'
     shell:
-        'bedtools intersect -a {input.giab_regions} -b {input.roi_bed} > {output}'
+        'bedtools intersect -header -a {input.vcf} -b {input.somatic_roi} | ' \
+        'bgzip -c > {output.vcf} && tabix {output.vcf}'
 
 rule prep_purple_gc:
     input:
-        f = PURPLE_GC
+        get_ref_file(GENOME, 'purple_gc')
     output:
-        f'data/genomes/{genome}/GC_profile.1000bp.cnp'
+        f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp'
     shell:
         'cp {input} {output}'
 
 rule prep_germline_het:
     input:
-        f = PURPLE_HET,
+        bed = get_ref_file(GENOME, 'purple_het'),
         roi_bed = rules.project_roi.output[0]
     output:
-        f'data/genomes/{genome}/germline_het_pon.bed.gz'
+        f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz'
     shell:
-        'bedtools intersect -a {input.f} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
+        'bedtools intersect -a {input.bed} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
+
+rule prep_hotspots:
+    input:
+        file = get_ref_file(GENOME, 'hmf_hotspot')
+    output:
+        f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz'
+    shell:
+        'cp {input} {output}'
+
+rule prep_giab_conf:
+    input:
+        bed = get_ref_file(GENOME, 'hmf_giab_conf'),
+        roi_bed = rules.project_roi.output[0]
+    output:
+        f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
+    shell:
+        'bedtools intersect -a {input.bed} -b {input.roi_bed} > {output}'
+
+rule prep_mappability:
+    input:
+        bed = get_ref_file(GENOME, 'hmf_mappability'),
+        roi_bed = rules.project_roi.output[0]
+    output:
+        f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz'
+    shell:
+        'bedtools intersect -a {input.bed} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
 
 
 ######################################
 #### Panel of normals ####
-rule project_somatic_roi:
-    input:
-        expand(rules.somatic_roi.output[0], batch=batch_by_name.keys())
-    output:
-        'work_snake/somatic_roi.bed'
-    shell:
-        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
-
 rule prep_pon_snps_vcf:
     input:
-        pon_vcf = join(PON_DIR, 'panel_of_normals.snps.vcf.gz'),
+        pon_vcf = join(get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz')
@@ -430,7 +456,7 @@ rule prep_pon_snps_vcf:
 
 rule prep_pon_indels_vcf:
     input:
-        pon_vcf = join(PON_DIR, 'panel_of_normals.indels.vcf.gz'),
+        pon_vcf = join(get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
