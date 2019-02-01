@@ -127,19 +127,6 @@ rule germline_roi:
     shell:
         vcf_to_bed()
 
-# ##################
-# ##### Purple #####
-# rule copy_purple:
-#     input:
-#         bcbio_amber_dir  = directory(join(run.work_dir, 'structural/{name}/purple/amber')),
-#         bcbio_cobalt_dir = directory(join(run.work_dir, 'structural/{name}/purple/cobalt')),
-#     output:
-#         amber_dir  = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/amber')),
-#         cobalt_dir = directory(join(bcbio_copy_work_dir, 'structural/{name}/purple/cobalt')),
-#     run:
-#         shell('cp -r {input.bcbio_amber_dir}  $(dirname {output.amber_dir})')
-#         shell('cp -r {input.bcbio_cobalt_dir} $(dirname {output.cobalt_dir})')
-
 
 ######################################
 #### MANTA ####
@@ -354,8 +341,6 @@ rule populate_batch:
         normal_bam = 'work_snake/{batch}_normal.bam',
         tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
         normal_bai = 'work_snake/{batch}_normal.bam.bai',
-        # amber_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/amber')),
-        # cobalt_dir = lambda wc: directory(join(bcbio_copy_work_dir, f'structural/{batch_by_name[wc.batch].tumor.name}/purple/cobalt')),
         synced = join(bcbio_copy_date, '.rsynced.done'),
     output:
         marker = bcbio_copy_path + '/.populated_batch_{batch}.done'
