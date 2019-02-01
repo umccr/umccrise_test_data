@@ -34,6 +34,7 @@ class Test_umccrise(BaseTestCase):
     try:
         from hpc_utils import hpc
         loc = hpc.find_loc()
+        pcgr_data = hpc.get_ref_file(key='pcgr_data', loc=loc)
     except:  # When testing the dockerized version
         loc = None
 
@@ -68,7 +69,7 @@ gunzip {ref_fasta_path}.gz''')
         if docker_wrapper_mode:
             cmdl += ' --docker'
         if not skip_pcgr and docker_wrapper_mode:
-            cmdl += f' --pcgr-data {Test_umccrise.loc.pcgr_data}'
+            cmdl += f' --pcgr-data {Test_umccrise.pcgr_data}'
         if skip_pcgr:
             cmdl += ' --no-pcgr'
         self._run_cmd(cmdl, bcbio_dir, results_dir)
