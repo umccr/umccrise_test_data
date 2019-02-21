@@ -10,13 +10,11 @@ try:
     from ngs_utils.utils import is_az, is_local, is_travis
     from ngs_utils.file_utils import safe_mkdir
     from ngs_utils.call_process import run_simple
-    from hpc_utils.hpc import find_loc
+    from hpc_utils import hpc
 except ImportError as e:
     traceback.print_exc()
     sys.stderr.write('\nUmccrise is not installed properly. Refer to the README.md for installation\n')
     sys.exit(1)
-
-loc = find_loc()
 
 
 TUMORS = ['cup_tissue']
@@ -31,45 +29,24 @@ class Test_umccrise(BaseTestCase):
     data_dir = join(test_data_clone, BaseTestCase.data_dir)
     results_dir = join(test_data_clone, BaseTestCase.results_dir)
     gold_standard_dir = join(test_data_clone, BaseTestCase.gold_standard_dir)
-    try:
-        from hpc_utils import hpc
-        loc = hpc.find_loc()
-        pcgr_data = hpc.get_ref_file(key='pcgr_data', loc=loc)
-    except:  # When testing the dockerized version
-        loc = None
 
     reuse = False  # Run on top of existing latest results. Also controlled with TEST_REUSE
     only_diff = False  # Do not run, just diff the latest results against the gold standard. Also controlled with TEST_ONLY_DIFF
 
     def setUp(self):
         assert os.system(f'which {self.script}') == 0, 'Umccrise is not installed. Refer to the README.md for installation'
-
-        if not Test_umccrise.loc or Test_umccrise.loc.name == 'travis':
-            echo('Server is not recognized, downloaded the reference data')
-            ref_fasta_dir = join(Test_umccrise.test_data_clone, 'data/genomes/GRCh37')
-            ref_fasta_path = join(ref_fasta_dir, 'GRCh37.fa')
-            if not isfile(ref_fasta_path):
-                print('Downloading GRCh37 genome...')
-                run_simple(f'''wget -nv --no-check-certificate -c https://s3.amazonaws.com/biodata/genomes/GRCh37-seq.tar.gz && 
-tar -xzvpf GRCh37-seq.tar.gz --directory {ref_fasta_dir} && 
-mv {ref_fasta_dir}/seq/* {ref_fasta_dir}/ && 
-rm -f GRCh37-seq.tar.gz && 
-gunzip {ref_fasta_path}.gz''')
-
         BaseTestCase.setUp(self)
 
     def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = join(self.results_dir, bcbio_dirname)
         bcbio_dir = join(self.data_dir, bcbio_dirname)
         cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3'
-        if not Test_umccrise.loc or docker_wrapper_mode:
+        if docker_wrapper_mode:
             cmdl += f' --genomes {Test_umccrise.test_data_clone}/data/genomes'
         if parallel:
             cmdl += ' -j10'
         if docker_wrapper_mode:
             cmdl += ' --docker'
-        if not skip_pcgr and docker_wrapper_mode:
-            cmdl += f' --pcgr-data {Test_umccrise.pcgr_data}'
         if skip_pcgr:
             cmdl += ' --no-pcgr'
         self._run_cmd(cmdl, bcbio_dir, results_dir)

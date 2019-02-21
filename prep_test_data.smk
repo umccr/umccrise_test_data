@@ -9,7 +9,7 @@ from os.path import join, abspath, relpath, basename, isfile, dirname
 from glob import glob
 from ngs_utils.file_utils import splitext_plus, safe_mkdir
 from ngs_utils.reference_data import get_key_genes_bed
-from hpc_utils.hpc import get_ref_file
+from hpc_utils import hpc
 from ngs_utils.utils import flatten
 
 
@@ -375,7 +375,7 @@ rule populate_batch:
 #### Reference data ####
 rule prep_gnomad:
     input:
-        vcf = get_ref_file(GENOME, 'gnomad'),
+        vcf = hpc.get_ref_file(GENOME, 'gnomad'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz'
@@ -385,7 +385,7 @@ rule prep_gnomad:
 
 rule prep_purple_gc:
     input:
-        get_ref_file(GENOME, 'purple_gc')
+        hpc.get_ref_file(GENOME, 'purple_gc')
     output:
         f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp'
     shell:
@@ -393,7 +393,7 @@ rule prep_purple_gc:
 
 rule prep_germline_het:
     input:
-        bed = get_ref_file(GENOME, 'purple_het'),
+        bed = hpc.get_ref_file(GENOME, 'purple_het'),
         roi_bed = rules.project_roi.output[0]
     output:
         f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz'
@@ -402,7 +402,7 @@ rule prep_germline_het:
 
 rule prep_hotspots:
     input:
-        file = get_ref_file(GENOME, 'hmf_hotspot')
+        file = hpc.get_ref_file(GENOME, 'hmf_hotspot')
     output:
         f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz'
     shell:
@@ -410,7 +410,7 @@ rule prep_hotspots:
 
 rule prep_giab_conf:
     input:
-        bed = get_ref_file(GENOME, 'hmf_giab_conf'),
+        bed = hpc.get_ref_file(GENOME, 'hmf_giab_conf'),
         roi_bed = rules.project_roi.output[0]
     output:
         f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
@@ -419,7 +419,7 @@ rule prep_giab_conf:
 
 rule prep_mappability:
     input:
-        bed = get_ref_file(GENOME, 'hmf_mappability'),
+        bed = hpc.get_ref_file(GENOME, 'hmf_mappability'),
         roi_bed = rules.project_roi.output[0]
     output:
         f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz'
@@ -431,7 +431,7 @@ rule prep_mappability:
 #### Panel of normals ####
 rule prep_pon_snps_vcf:
     input:
-        pon_vcf = join(get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
+        pon_vcf = join(hpc.get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz')
@@ -441,7 +441,7 @@ rule prep_pon_snps_vcf:
 
 rule prep_pon_indels_vcf:
     input:
-        pon_vcf = join(get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
+        pon_vcf = join(hpc.get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
