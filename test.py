@@ -34,7 +34,8 @@ class Test_umccrise(BaseTestCase):
     only_diff = False  # Do not run, just diff the latest results against the gold standard. Also controlled with TEST_ONLY_DIFF
 
     def setUp(self):
-        assert os.system(f'which {self.script}') == 0, 'Umccrise is not installed. Refer to the README.md for installation'
+        # important: avoid an f-string here to make sure it prints an error with python2 as well!
+        assert os.system(f'which ' + self.script) == 0, 'Umccrise is not installed. Refer to the README.md for installation'
         BaseTestCase.setUp(self)
 
     def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
