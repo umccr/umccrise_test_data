@@ -79,8 +79,8 @@ rule all:
         purple_gc       = f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp',
         purple_het      = f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz',
         hmf_hotspot     = f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz',
-        hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz',
-        hmf_mappability = f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz',
+        hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
+        # hmf_mappability = f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz',
 
 
 ######################################
