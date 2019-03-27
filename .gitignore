@@ -108,3 +108,5 @@ data/genomes/GRCh37/gnomad_genome.vcf.gz*
 
 .Rhistory
 rmd_tests/
+
+data/bcbio_test_project.tar.gz
