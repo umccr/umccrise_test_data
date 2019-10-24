@@ -1,13 +1,11 @@
 Test data for umccrise
 ----------------------------------------------------------------------------
 
+```
 normal: CCR180074_WH18B001P017
 batch: 2016.249.18.WH.P017_1 - tumor: CCR180074_WH18B001P017
 batch: 2016.249.18.WH.P017_2 - tumor: CCR180159_VPT-WH017A
-
-snakemake -p -s Snakefile.prep_test_data --config sample=CCR170093_MHP013_O,CCR180137_VPT-WH23
-batch: 2016.249.18.WH.P023,   tumor: CCR180137_VPT-WH23,   normal: CCR180120_WH18B001P023
-batch: 2016.249.17.MH.P013_1, tumor: CCR170093_MHP013_O,   normal: CCR170010_MPH013_N
+```
 
 ## Generating test data
 
