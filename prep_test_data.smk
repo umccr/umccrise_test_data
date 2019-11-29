@@ -210,7 +210,7 @@ rule subset_bam:
     output:
         'work_snake/{batch}_{phenotype}.bam'
     shell:
-        '~/bin/sambamba slice {input.bam} -L {input.roi_bed} | samtools sort -Obam -o {output} /dev/stdin'
+        'sambamba slice {input.bam} -L {input.roi_bed} | samtools sort -Obam -o {output} /dev/stdin'
 
 rule index_bam:
     input:
