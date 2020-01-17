@@ -45,7 +45,7 @@ rule all:
         expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
         expand(join(PROJECT_NEW_PATH, '.populated_downsampled_{batch}.done'), batch=batch_by_name.keys()),
-        expand(join(PROJECT_NEW_PATH, '.populated_qc_files_{batch}.done')   , batch=batch_by_name.keys()),
+        expand(join(PROJECT_NEW_PATH, '.populated_other_files_{batch}.done')   , batch=batch_by_name.keys()),
         # reference data:
         pon_snps_vcf    = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf  = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
@@ -216,17 +216,19 @@ rule populate_downsampled:
         shell('touch {output.marker}')
 
 
-rule populate_qc_files:
+rule populate_other_files:
     input:
         qc_files = lambda wc: batch_by_name[wc.batch].all_qc_files(),
+        replay_file = lambda wc: batch_by_name[wc.batch].replay_file,
     output:
-        marker = join(PROJECT_NEW_PATH, '.populated_qc_files_{batch}.done')
+        marker = join(PROJECT_NEW_PATH, '.populated_other_files_{batch}.done')
     params:
         project_copy = PROJECT_NEW_PATH,
     run:
-        for qc_fpath in input.qc_files:
-            new_path = join(params.project_copy, basename(qc_fpath))
-            shell('cp {qc_fpath} {new_path}')
+        files = input.qc_files + [input.replay_file]
+        for fpath in files:
+            new_path = join(params.project_copy, basename(fpath))
+            shell('cp {fpath} {new_path}')
         shell('touch {output.marker}')
 
 
