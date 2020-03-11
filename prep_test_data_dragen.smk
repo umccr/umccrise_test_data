@@ -12,13 +12,14 @@ log.init(config.get('debug', False))
 print('debug = ', log.is_debug)
 
 GENOME = 'hg38'
-DRAGEN_DIR = config.get('dragen_dir', '/g/data/gx8/extras/umccrise_017_2020_Jan/umccrise_test_data/running_dragen/T_SRR7890902_20pc')
+#DRAGEN_DIR = config.get('dragen_dir', '/g/data/gx8/extras/umccrise_017_2020_Jan/umccrise_test_data/running_dragen/T_SRR7890902_20pc')
+DRAGEN_DIR = config.get('dragen_dir', '/g/data/gx8/extras/umccrise_017_2020_Jan/umccrise_test_data/running_dragen/P025_with_sv')
 run = DragenProject(DRAGEN_DIR)
 included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
 
-SORT_SEED = "--random-source <(echo AAAAAAAAAAAAAAAAAAA)"
+SORT_SEED = "--random-source <(echo 42)"
 
 
 Out_PON_PATH = f'data/genomes/{GENOME}/panel_of_normals'
@@ -51,7 +52,7 @@ rule all:
         pon_indels_vcf  = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
         gnomad          = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz',
         purple_gc       = f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp',
-        purple_het      = f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz',
+        purple_het      = f'data/genomes/{GENOME}/hmf/germline_het_pon.vcf.gz',
         hmf_hotspot     = f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz',
         hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
 
@@ -254,12 +255,12 @@ rule prep_purple_gc:
 
 rule prep_germline_het:
     input:
-        bed = hpc.get_ref_file(GENOME, 'purple_het'),
+        het_vcf = hpc.get_ref_file(GENOME, 'purple_het'),
         roi_bed = rules.project_roi.output[0]
     output:
-        f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz'
+        f'data/genomes/{GENOME}/hmf/germline_het_pon.vcf.gz'
     shell:
-        'bedtools intersect -a {input.bed} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
+        'bedtools intersect -a {input.het_vcf} -b {input.roi_bed} | bgzip -c > {output} && tabix -p vcf {output}'
 
 rule prep_hotspots:
     input:
