@@ -194,6 +194,7 @@ rule populate_downsampled:
         normal_bam     = 'work_snake/{batch}_normal.bam',
         tumor_bai      = 'work_snake/{batch}_tumor.bam.bai',
         normal_bai     = 'work_snake/{batch}_normal.bam.bai',
+        marker         = join(PROJECT_NEW_PATH, '.populated_other_files_{batch}.done')  # need the bam_list.csv file to parse DragenProject
     output:
         marker = join(PROJECT_NEW_PATH, '.populated_downsampled_{batch}.done')
     params:
@@ -221,12 +222,13 @@ rule populate_other_files:
     input:
         qc_files = lambda wc: batch_by_name[wc.batch].all_qc_files(),
         replay_file = lambda wc: batch_by_name[wc.batch].replay_file,
+        bam_list_csv = run.bam_list_csv,
     output:
         marker = join(PROJECT_NEW_PATH, '.populated_other_files_{batch}.done')
     params:
         project_copy = PROJECT_NEW_PATH,
     run:
-        files = input.qc_files + [input.replay_file]
+        files = input.qc_files + [input.replay_file, input.bam_list_csv]
         for fpath in files:
             new_path = join(params.project_copy, basename(fpath))
             shell('cp {fpath} {new_path}')
