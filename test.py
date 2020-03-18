@@ -38,10 +38,10 @@ class Test_umccrise(BaseTestCase):
         assert os.system(f'which ' + self.script) == 0, 'Umccrise is not installed. Refer to the README.md for installation'
         BaseTestCase.setUp(self)
 
-    def _run_umccrise(self, bcbio_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
-        results_dir = join(self.results_dir, bcbio_dirname)
-        bcbio_dir = join(self.data_dir, bcbio_dirname)
-        cmdl = f'{self.script} {bcbio_dir} -o {results_dir} --no-s3'
+    def _run_umccrise(self, input_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
+        results_dir = join(self.results_dir, input_dirname)
+        input_dir = join(self.data_dir, input_dirname)
+        cmdl = f'{self.script} {input_dir} -o {results_dir} --no-s3'
         if docker_wrapper_mode:
             cmdl += f' --genomes {Test_umccrise.test_data_clone}/data/genomes'
         if parallel:
@@ -50,7 +50,7 @@ class Test_umccrise(BaseTestCase):
             cmdl += ' --docker'
         if skip_pcgr:
             cmdl += ' --no-pcgr'
-        self._run_cmd(cmdl, bcbio_dir, results_dir)
+        self._run_cmd(cmdl, input_dir, results_dir)
         return results_dir
 
     def _check_file(self, diff_failed, path, ignore_matching_lines=None, wrapper=None, check_diff=True):
@@ -64,9 +64,9 @@ class Test_umccrise(BaseTestCase):
             return True
         return diff_failed
 
-    @attr('normal')
+    @attr('bcbio')
     def test(self, docker_wrapper_mode=False, skip_pcgr=False):
-        results_dir = self._run_umccrise(bcbio_dirname='bcbio_test_project', parallel=False,
+        results_dir = self._run_umccrise(input_dirname='bcbio_test_project', parallel=False,
                                          docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
 
         failed = False
@@ -92,6 +92,11 @@ class Test_umccrise(BaseTestCase):
         #     failed = self._check_file(failed, f'{results_dir}/{batch}/purple/{batch}.purple.circos.png', check_diff=False)
 
         assert not failed, 'some of file checks have failed'
+
+    @attr('dragen')
+    def test(self, docker_wrapper_mode=False, skip_pcgr=False):
+        results_dir = self._run_umccrise(input_dirname='dragen_test_project', parallel=False,
+                                         docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
 
     # @attr('skip_pcgr')
     # def test_no_pcgr(self):
