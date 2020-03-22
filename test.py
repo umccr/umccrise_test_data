@@ -65,7 +65,7 @@ class Test_umccrise(BaseTestCase):
         return diff_failed
 
     @attr('bcbio')
-    def test(self, docker_wrapper_mode=False, skip_pcgr=False):
+    def test_bcbio(self, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = self._run_umccrise(input_dirname='bcbio_test_project', parallel=False,
                                          docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
 
@@ -94,7 +94,7 @@ class Test_umccrise(BaseTestCase):
         assert not failed, 'some of file checks have failed'
 
     @attr('dragen')
-    def test(self, docker_wrapper_mode=False, skip_pcgr=False):
+    def test_dragen(self, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = self._run_umccrise(input_dirname='dragen_test_project', parallel=False,
                                          docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
 
