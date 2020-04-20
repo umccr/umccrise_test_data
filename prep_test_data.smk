@@ -1,53 +1,34 @@
 import os
-import shutil
-import csv
-
 import yaml
-
-from ngs_utils.bcbio import BcbioProject
 from os.path import join, abspath, relpath, basename, isfile, dirname
-from glob import glob
+from ngs_utils.bcbio import BcbioProject
 from ngs_utils.file_utils import splitext_plus, safe_mkdir
 from ngs_utils.reference_data import get_key_genes_bed
 from hpc_utils import hpc
-from ngs_utils.utils import flatten
 
 
 shell.executable(os.environ.get('SHELL', 'bash'))
-shell.prefix('')  # Fixes Snakemake on Spartan
 
+GENOME = 'hg38'
 
-GENOME = 'GRCh37'
-
-
-include_names = config.get('sample')
-if include_names:
-    include_names = str(include_names).split(',')
-    include_names = [v for v in flatten([sn.split('__') for sn in include_names])]  # support "batch__sample" notation
-
-
-# CWL: '/g/data/gx8/projects/Grimmond_Avner/2018-07-31T0309_Avner_WGS-merged/cromwell/final'
-BCBIO_DIR = config.get('final', '/data/cephfs/punim0010/data/Results/Avner/2018-12-05/final')
-include_names = ['CCR180074_WH18B001P017', 'CCR180075_WH18T002P017', 'CCR180159_VPT-WH017A']
-# BCBIO_DIR = config.get('final', '/g/data3/gx8/projects/Hofmann_Avner/2018-11-30T1125_Avner_WGS-merged/final')
+BCBIO_DIR = config.get('final', '/g/data/gx8/projects/Saveliev_SEQCII/bcbio/samples/final')
+include_names = ['T_SRR7890936_50pc']
 run = BcbioProject(BCBIO_DIR, include_samples=include_names)
 included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
-print(batch_by_name)
 
-
-SORT_SEED = "--random-source <(echo AAAAAAAAAAAAAAAAAAA)"
-
+ONCOVIRAL_READS_DIR = join('data', 'viral_reads_from_neverresponder')
 
 Out_PON_PATH = f'data/genomes/{GENOME}/panel_of_normals'
-bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
+bcbio_copy_path = config.get('out', 'data/bcbio_test_project_seqcII')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_work_dir = join(bcbio_copy_path, 'work')
 bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
 
-
 mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
 # if the file exists, we populate QC (because CWL output currently missing this file as longs as all qc)
+
+SORT_SEED = "--random-source <(echo AAAAAAAAAAAAAAAAAAA)"
 
 
 def extract_genes_from_vcf(inp='{input}', out='{output}'):
@@ -67,8 +48,8 @@ def downsample_vcf(num, inp='{input}', out='{output}'):
 
 rule all:
     input:
-        expand('work_snake/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
-        expand('work_snake/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
+        expand('work_snake/bam_remap/{batch}_tumor.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
+        expand('work_snake/bam_remap/{batch}_normal.bam{ext}', batch=batch_by_name.keys(), ext=['', '.bai']),
         'work_snake/roi.bed',
         expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
         join(bcbio_copy_path, '.populated_qc.done') if isfile(mq_list_files) else [],
@@ -77,10 +58,9 @@ rule all:
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
         gnomad          = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz',
         purple_gc       = f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp',
-        purple_het      = f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz',
-        hmf_hotspot     = f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz',
+        purple_het      = f'data/genomes/{GENOME}/hmf/GermlineHetPon.hg19.vcf.gz',
+        hotspots        = f'data/genomes/{GENOME}/hotspots/merged.vcf.gz',
         hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
-        # hmf_mappability = f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz',
 
 
 ######################################
@@ -132,7 +112,7 @@ rule germline_roi:
 #### MANTA ####
 rule downsample_manta:
     input:
-        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize-manta.vcf.gz')
+        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-manta.vcf.gz')
     output:
         'work_snake/sv/{batch}-manta.vcf'
     shell:
@@ -145,16 +125,6 @@ rule manta_roi:
         'work_snake/sv/{batch}-manta.bed'
     shell:
         vcf_to_bed()
-
-rule downsample_sv_prioritize:
-    input:
-        tsv = lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-sv-prioritize.tsv'),
-        manta_vcf = rules.downsample_manta.output[0]
-    output:
-        'work_snake/sv/{batch}-sv-prioritize-tsv'
-    shell:
-        'head -n1 {input.tsv} > {output} && '
-        'grep -f <(cut -f2 {input.manta_vcf}) {input.tsv} >> {output}'
 
 ######################################
 #### BAMS ####
@@ -180,7 +150,8 @@ rule batch_roi:
 
 rule conpair_roi:
     input:
-        'data/conpair_markers/GRCh37.bed' if GENOME == 'GRCh37' else 'data/conpair_markers/hg38.bed'
+        'data/conpair_markers/GRCh37.bed' if GENOME == 'GRCh37' else \
+        'data/conpair_markers/hg38.liftover.bed'
     output:
         'work_snake/conpair_roi.bed'
     shell:
@@ -193,7 +164,11 @@ rule project_roi:
     output:
         'work_snake/roi.bed'
     shell:
-        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+        'cat {input}'
+        ' | bedtools sort -i stdin'
+        ' | bedtools merge -i stdin'
+        ' | bed slop -b 1000'
+        ' > {output}'
 
 rule project_somatic_roi:
     input:
@@ -201,22 +176,62 @@ rule project_somatic_roi:
     output:
         'work_snake/somatic_roi.bed'
     shell:
-        'cat {input} | bedtools sort -i stdin | bedtools merge -i stdin > {output}'
+        'cat {input}'
+        ' | bedtools sort -i stdin'
+        ' | bedtools merge -i stdin'
+        ' | bed slop -b 1000'
+        ' > {output}'
 
 rule subset_bam:
     input:
         bam = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).bam,
         roi_bed = rules.project_roi.output[0]
     output:
-        'work_snake/{batch}_{phenotype}.bam'
+        bam_namesorted= 'work_snake/bam_subset/{batch}_{phenotype}.bam'
     shell:
-        'sambamba slice {input.bam} -L {input.roi_bed} | samtools sort -Obam -o {output} /dev/stdin'
+        'sambamba slice {input.bam} -L {input.roi_bed}'
+        ' | samtools sort -n -Obam'
+        ' -o {output} /dev/stdin'
+
+rule extract_reads:
+    input:
+        bam_namesorted = rules.subset_bam.output.bam_namesorted,
+    output:
+        fq1 = 'work_snake/bam_subset_fq/{batch}_{phenotype}.R1.fq',
+        fq2 = 'work_snake/bam_subset_fq/{batch}_{phenotype}.R2.fq',
+    shell:
+        'samtools fastq {input.bam_namesorted} -1 {output.fq1} -2 {output.fq2} -s /dev/null'
+
+rule add_viral_reads:
+    input:
+        fq1 = rules.extract_reads.output.fq1,
+        fq2 = rules.extract_reads.output.fq2,
+        viral_fq1 = join(ONCOVIRAL_READS_DIR, 'step6_HPV18_bridging.R1.fq'),
+        viral_fq2 = join(ONCOVIRAL_READS_DIR, 'step6_HPV18_bridging.R2.fq'),
+    output:
+        fq1 = 'work_snake/bam_subset_plusviral_fq/{batch}_{phenotype}.plusviral.R1.fq',
+        fq2 = 'work_snake/bam_subset_plusviral_fq/{batch}_{phenotype}.plusviral.R2.fq',
+    shell:
+        'cat {input.fq1} {input.viral_fq1} > {output.fq1} &&'
+        'cat {input.fq2} {input.viral_fq2} > {output.fq2}'
+
+rule remap_reads:
+    input:
+        fq1 = rules.add_viral_reads.output.fq1,
+        fq2 = rules.add_viral_reads.output.fq2,
+    output:
+        bam = 'work_snake/bam_remap/{batch}_{phenotype}.bam',
+    params:
+        bwt_index = hpc.get_ref_file(GENOME, 'bwa', must_exist=False),
+    shell:
+        "test -e {params.bwt_index}.bwt && bwa mem {params.bwt_index} {input.fq1} {input.fq2}"
+        " | samtools sort -Obam -o {output.bam}"
 
 rule index_bam:
     input:
-        'work_snake/{batch}_{phenotype}.bam'
+        bam = rules.remap_reads.output.bam
     output:
-        'work_snake/{batch}_{phenotype}.bam.bai'
+        bai = rules.remap_reads.output.bam + '.bai',
     shell:
         'samtools index {input}'
 
@@ -280,7 +295,7 @@ rule rsync_project:
     run:
         exclude_samples = ''
         safe_mkdir(join(params.project_copy, 'config'))
-        exclude_samples = [s.name for s in BcbioProject(BCBIO_DIR, exclude_samples=included_names).samples]
+        exclude_samples = [s.name for s in BcbioProject(BCBIO_DIR, include_samples=included_names).samples]
         exclude_samples = ' '.join(f'--exclude {sn}' for sn in exclude_samples)
         new_yaml = join(params.project_copy, 'config', basename(run.bcbio_yaml_fpath))
         with open(run.bcbio_yaml_fpath) as inp, open(new_yaml, 'w') as out:
@@ -335,12 +350,11 @@ rule populate_batch:
     input:
         somatic_vcf = rules.downsample_somatic.output[0],
         germline_vcf = rules.downsample_germline_random100.output[0],
-        sv_prio = rules.downsample_sv_prioritize.output[0],
         manta_vcf = rules.downsample_manta.output[0],
-        tumor_bam = 'work_snake/{batch}_tumor.bam',
-        normal_bam = 'work_snake/{batch}_normal.bam',
-        tumor_bai = 'work_snake/{batch}_tumor.bam.bai',
-        normal_bai = 'work_snake/{batch}_normal.bam.bai',
+        tumor_bam = 'work_snake/bam_remap/{batch}_tumor.bam',
+        normal_bam = 'work_snake/bam_remap/{batch}_normal.bam',
+        tumor_bai = 'work_snake/bam_remap/{batch}_tumor.bam.bai',
+        normal_bai = 'work_snake/bam_remap/{batch}_normal.bam.bai',
         synced = join(bcbio_copy_date, '.rsynced.done'),
     output:
         marker = bcbio_copy_path + '/.populated_batch_{batch}.done'
@@ -348,16 +362,13 @@ rule populate_batch:
         batch = batch_by_name[wildcards.batch]
 
         somatic_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.name}-ensemble-annotated.vcf.gz')
-        shell(f'bgzip -c {input.somatic_vcf} > {somatic_vcf} && tabix {somatic_vcf}')
+        shell(f'bcftools sort {input.somatic_vcf} | bgzip -c > {somatic_vcf} && tabix {somatic_vcf}')
 
         germline_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.normal.name}-germline-ensemble-annotated.vcf.gz')
-        shell(f'bgzip -c {input.germline_vcf} > {germline_vcf} && tabix {germline_vcf}')
+        shell(f'bcftools sort {input.germline_vcf} | bgzip -c > {germline_vcf} && tabix {germline_vcf}')
 
-        manta_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize-manta.vcf.gz')
-        shell(f'bgzip -c {input.manta_vcf} > {manta_vcf} && tabix {manta_vcf}')
-
-        sv_prio = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-sv-prioritize.tsv')
-        shell(f'cp {input.sv_prio} {sv_prio}')
+        manta_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-manta.vcf.gz')
+        shell(f'bcftools sort {input.manta_vcf} | bgzip -c > {manta_vcf} && tabix {manta_vcf}')
 
         tumor_bam_name = basename(batch.tumor.bam)
         normal_bam_name = basename(batch.normal.bam)
@@ -393,18 +404,19 @@ rule prep_purple_gc:
 
 rule prep_germline_het:
     input:
-        bed = hpc.get_ref_file(GENOME, 'purple_het'),
+        vcf = hpc.get_ref_file(GENOME, 'purple_het'),
         roi_bed = rules.project_roi.output[0]
     output:
-        f'data/genomes/{GENOME}/hmf/germline_het_pon.bed.gz'
+        f'data/genomes/{GENOME}/hmf/GermlineHetPon.hg19.vcf.gz'
     shell:
-        'bedtools intersect -a {input.bed} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
+        'bedtools intersect -a {input.vcf} -b {input.roi_bed} | '
+        'bgzip -c > {output} && tabix -p vcf {output}'
 
 rule prep_hotspots:
     input:
-        file = hpc.get_ref_file(GENOME, 'hmf_hotspot')
+        file = hpc.get_ref_file(GENOME, 'hotspots')
     output:
-        f'data/genomes/{GENOME}/hmf/KnownHotspots.tsv.gz'
+        f'data/genomes/{GENOME}/hotspots/merged.vcf.gz'
     shell:
         'cp {input} {output}'
 
@@ -417,21 +429,12 @@ rule prep_giab_conf:
     shell:
         'bedtools intersect -a {input.bed} -b {input.roi_bed} > {output}'
 
-rule prep_mappability:
-    input:
-        bed = hpc.get_ref_file(GENOME, 'hmf_mappability'),
-        roi_bed = rules.project_roi.output[0]
-    output:
-        f'data/genomes/{GENOME}/hmf/out_150_hg19.mappability.bed.gz'
-    shell:
-        'bedtools intersect -a {input.bed} -b {input.roi_bed} | bgzip -c > {output} && tabix -p bed {output}'
-
 
 ######################################
 #### Panel of normals ####
 rule prep_pon_snps_vcf:
     input:
-        pon_vcf = join(hpc.get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
+        pon_vcf = join(hpc.get_ref_file(GENOME, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz')
@@ -441,7 +444,7 @@ rule prep_pon_snps_vcf:
 
 rule prep_pon_indels_vcf:
     input:
-        pon_vcf = join(hpc.get_ref_file(genome, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
+        pon_vcf = join(hpc.get_ref_file(GENOME, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
