@@ -3,7 +3,7 @@ import yaml
 from os.path import join, abspath, relpath, basename, isfile, dirname
 from ngs_utils.bcbio import BcbioProject
 from ngs_utils.file_utils import splitext_plus, safe_mkdir
-from ngs_utils.reference_data import get_key_genes_bed
+from ngs_utils.reference_data import get_key_genes_bed, get_predispose_genes_bed
 from hpc_utils import hpc
 
 
@@ -85,23 +85,24 @@ rule somatic_roi:
 #### GERMLINE ####
 rule downsample_germline:
     input:
-        lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-germline-ensemble-annotated.vcf.gz')
+        vcf = lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-germline-ensemble-annotated.vcf.gz'),
+        predispose_genes_bed = get_predispose_genes_bed(GENOME),
     output:
-        'work_snake/germline/{batch}-germline-ensemble.vcf'
+        vcf = 'work_snake/germline/{batch}-germline-ensemble-predispose-genes.vcf'
     shell:
-        extract_genes_from_vcf()
+        'bcftools view -R <(head -n20 {input.predispose_genes_bed}) {input.vcf} > {output.vcf}'
 
-rule downsample_germline_random100:
-    input:
-        rules.downsample_germline.output[0]
-    output:
-        'work_snake/germline/{batch}-germline-ensemble-100.vcf'
-    shell:
-        downsample_vcf(100)
+# rule downsample_germline_random100:
+#     input:
+#         rules.downsample_germline.output[0]
+#     output:
+#         'work_snake/germline/{batch}-germline-ensemble-100.vcf'
+#     shell:
+#         downsample_vcf(100)
 
 rule germline_roi:
     input:
-        rules.downsample_germline_random100.output[0]
+        rules.downsample_germline.output[0]
     output:
         'work_snake/germline/{batch}-germline-ensemble.bed'
     shell:
@@ -150,36 +151,41 @@ rule batch_roi:
 
 rule conpair_roi:
     input:
-        'data/conpair_markers/GRCh37.bed' if GENOME == 'GRCh37' else \
-        'data/conpair_markers/hg38.liftover.bed'
+        bed = 'data/conpair_markers/GRCh37.bed' if GENOME == 'GRCh37' else \
+        'data/conpair_markers/hg38.liftover.bed',
+        fai = hpc.get_ref_file(GENOME, key='fa') + '.fai'
     output:
         'work_snake/conpair_roi.bed'
     shell:
-        'head -n100 {input} > {output}'
+        'head -n100 {input.bed} '
+        ' | bedtools slop -b 1000 -i stdin -g {input.fai}'
+        '> {output}'
 
 rule project_roi:
     input:
-        expand(rules.batch_roi.output[0], batch=batch_by_name.keys()),
-        rules.conpair_roi.output[0]
+        beds = expand(rules.batch_roi.output[0], batch=batch_by_name.keys()) +
+               [rules.conpair_roi.output[0]],
+        fai = hpc.get_ref_file(GENOME, key='fa') + '.fai'
     output:
         'work_snake/roi.bed'
     shell:
-        'cat {input}'
+        'cat {input.beds}'
         ' | bedtools sort -i stdin'
+        ' | bedtools slop -b 10 -i stdin -g {input.fai}'
         ' | bedtools merge -i stdin'
-        ' | bed slop -b 1000'
         ' > {output}'
 
 rule project_somatic_roi:
     input:
-        expand(rules.somatic_roi.output[0], batch=batch_by_name.keys())
+        beds = expand(rules.somatic_roi.output[0], batch=batch_by_name.keys()),
+        fai = hpc.get_ref_file(GENOME, key='fa') + '.fai',
     output:
         'work_snake/somatic_roi.bed'
     shell:
-        'cat {input}'
+        'cat {input.beds}'
         ' | bedtools sort -i stdin'
+        ' | bedtools slop -b 10 -i stdin -g {input.fai}'
         ' | bedtools merge -i stdin'
-        ' | bed slop -b 1000'
         ' > {output}'
 
 rule subset_bam:
@@ -349,7 +355,7 @@ if isfile(mq_list_files):
 rule populate_batch:
     input:
         somatic_vcf = rules.downsample_somatic.output[0],
-        germline_vcf = rules.downsample_germline_random100.output[0],
+        germline_vcf = rules.downsample_germline.output[0],
         manta_vcf = rules.downsample_manta.output[0],
         tumor_bam = 'work_snake/bam_remap/{batch}_tumor.bam',
         normal_bam = 'work_snake/bam_remap/{batch}_normal.bam',
