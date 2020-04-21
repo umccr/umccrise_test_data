@@ -86,11 +86,12 @@ rule somatic_roi:
 rule downsample_germline:
     input:
         vcf = lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-germline-ensemble-annotated.vcf.gz'),
-        predispose_genes_bed = get_predispose_genes_bed(GENOME),
+        predispose_genes_bed = get_predispose_genes_bed(GENOME, coding_only=True),
     output:
         vcf = 'work_snake/germline/{batch}-germline-ensemble-predispose-genes.vcf'
     shell:
-        'bcftools view -R <(head -n20 {input.predispose_genes_bed}) {input.vcf} > {output.vcf}'
+        'bcftools view -T <(sort -R {SORT_SEED} {input.predispose_genes_bed} | head -n500) {input.vcf}'
+        ' > {output.vcf}'
 
 # rule downsample_germline_random100:
 #     input:
@@ -229,8 +230,10 @@ rule remap_reads:
         bam = 'work_snake/bam_remap/{batch}_{phenotype}.bam',
     params:
         bwt_index = hpc.get_ref_file(GENOME, 'bwa', must_exist=False),
+        sample = lambda wc: batch_by_name[wc.batch].name,
     shell:
-        "test -e {params.bwt_index}.bwt && bwa mem {params.bwt_index} {input.fq1} {input.fq2}"
+        "test -e {params.bwt_index}.bwt &&"
+        " bwa mem -R '@RG\\tID:{params.sample}\\tSM:{params.sample}' {params.bwt_index} {input.fq1} {input.fq2} "
         " | samtools sort -Obam -o {output.bam}"
 
 rule index_bam:
