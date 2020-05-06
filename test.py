@@ -41,13 +41,11 @@ class Test_umccrise(BaseTestCase):
     def _run_umccrise(self, input_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = join(self.results_dir, input_dirname)
         input_dir = join(self.data_dir, input_dirname)
-        cmdl = f'{self.script} {input_dir} -o {results_dir} --no-s3'
+        cmdl = f'{self.script} {input_dir} -o {results_dir} -r0'
         if docker_wrapper_mode:
             cmdl += f' --genomes {Test_umccrise.test_data_clone}/data/genomes'
         if parallel:
             cmdl += ' -j10'
-        if docker_wrapper_mode:
-            cmdl += ' --docker'
         if skip_pcgr:
             cmdl += ' --no-pcgr'
         self._run_cmd(cmdl, input_dir, results_dir)
