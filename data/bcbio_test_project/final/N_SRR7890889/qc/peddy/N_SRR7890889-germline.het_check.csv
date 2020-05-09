@@ -1,0 +1,2 @@
+sample_id,depth_outlier,het_count,het_ratio,idr_baf,mean_depth,median_depth,p10,p90,sampled_sites,call_rate,PC1,PC2,PC3,PC4,ancestry-prediction,ancestry-prob
+N_SRR7890889,False,3522,0.6446,0.2128,44.94,45,0.383,0.5957,5446,1,-0.6987,-1.516,-0.6734,-0.8573,EUR,0.9982

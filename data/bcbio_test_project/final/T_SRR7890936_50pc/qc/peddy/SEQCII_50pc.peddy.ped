@@ -1,0 +1,2 @@
+#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	Ethnicity	het_call_rate	het_ratio	het_mean_depth	het_idr_baf	ancestry-prediction	PC1	PC2	PC3	sex_het_ratio	sex_fixed
+SEQCII_50pc	T_SRR7890936_50pc	-9	-9	0	2	-9	1	0.6441040256501603	81.07231920199501	0.525078649458743	EUR	-0.7334683378660439	-1.5704990794555906	-0.6720173632804901	3.2385204081632653	True

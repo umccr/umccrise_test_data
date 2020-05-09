@@ -1,2 +1,0 @@
-sample_id,depth_outlier,het_count,het_ratio,idr_baf,mean_depth,median_depth,p10,p90,sampled_sites,call_rate,PC1,PC2,PC3,PC4,ancestry-prediction,ancestry-prob
-CCR180074_WH18B001P017,False,3998,0.6833,0.2354,47.22,46,0.3556,0.5909,5820,1,-0.7492,-1.528,-0.3938,-1.092,EUR,0.9974

@@ -1,0 +1,2 @@
+error,het_count,het_ratio,hom_alt_count,hom_ref_count,ped_sex,predicted_sex,sample_id
+True,1664,0.205,8117,0,unknown,male,N_SRR7890889

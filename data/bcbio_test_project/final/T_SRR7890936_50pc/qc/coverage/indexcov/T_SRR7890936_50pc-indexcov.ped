@@ -1,0 +1,2 @@
+#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	CNchrX	CNchrY	bins.out	bins.lo	bins.hi	bins.in	slope	p.out	mapped	unmapped
+unknown	T_SRR7890936_50pc	-9	-9	1	-9	1.14	0.00	89385	7729	35574	86026	64.867	1.04	2169347017	1105575

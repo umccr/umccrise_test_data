@@ -1,0 +1,2 @@
+#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	Ethnicity	het_call_rate	het_ratio	het_mean_depth	het_idr_baf	ancestry-prediction	PC1	PC2	PC3	sex_het_ratio	sex_fixed
+N_SRR7890889-germline	N_SRR7890889	-9	-9	0	0	-9	1	0.6445827232796486	44.93777452415813	0.21276595744680848	EUR	-0.6986721386764521	-1.5159253253025553	-0.6733686466902041	0.2050018479733892	True

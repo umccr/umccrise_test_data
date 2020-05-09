@@ -1,2 +1,0 @@
-#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	Ethnicity	het_call_rate	het_ratio	het_mean_depth	het_idr_baf	ancestry-prediction	PC1	PC2	PC3	sex_het_ratio	sex_fixed
-2016.249.18.WH.P017	CCR180159_VPT-WH017A	-9	-9	0	2	-9	1	0.6859028600440007	73.42900660010154	0.2152526623609759	EUR	-0.7487936265117601	-1.5248341741611011	-0.4155143399994543	0.574430823117338	True

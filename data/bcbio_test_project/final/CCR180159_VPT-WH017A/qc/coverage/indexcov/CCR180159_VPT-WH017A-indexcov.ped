@@ -1,2 +1,0 @@
-#family_id	sample_id	paternal_id	maternal_id	sex	phenotype	CNX	CNY	bins.out	bins.lo	bins.hi	bins.in	slope	p.out	mapped	unmapped
-unknown	CCR180159_VPT-WH017A	-9	-9	1	-9	1.02	1.07	20675	11785	7470	155451	115.575	0.13	1593071896	3273032
