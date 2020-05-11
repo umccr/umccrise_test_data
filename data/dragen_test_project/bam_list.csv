@@ -1,3 +1,0 @@
-RGID,SampleID,Library,Lane,BamFile
-P025_N,0x55d4760,0x55d87b0,0x55d87d0,/output/P025/P025.bam
-P025_T,0x55d4768,0x55d87b8,0x55d87d8,/output/P025/P025_tumor.bam
