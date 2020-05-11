@@ -5,21 +5,19 @@ from ngs_utils.bcbio import BcbioProject
 from ngs_utils.file_utils import splitext_plus, safe_mkdir
 from ngs_utils.reference_data import get_key_genes_bed, get_predispose_genes_bed
 from hpc_utils import hpc
+from ngs_utils import logger as log
 
 
 shell.executable(os.environ.get('SHELL', 'bash'))
+log.init(config.get('debug', False))
 
 GENOME = 'hg38'
-
 BCBIO_DIR = config.get('final', '/g/data/gx8/projects/Saveliev_SEQCII/bcbio/samples/final')
 include_names = ['T_SRR7890936_50pc']
 run = BcbioProject(BCBIO_DIR, include_samples=include_names)
 included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
-ONCOVIRAL_READS_DIR = join('data', 'viral_reads_from_neverresponder')
-
-Out_PON_PATH = f'data/genomes/{GENOME}/panel_of_normals'
 bcbio_copy_path = config.get('out', 'data/bcbio_test_project_seqcII')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_work_dir = join(bcbio_copy_path, 'work')
@@ -28,6 +26,8 @@ bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
 mq_list_files = join(run.date_dir, 'multiqc', 'list_files_final.txt')
 # if the file exists, we populate QC (because CWL output currently missing this file as longs as all qc)
 
+ONCOVIRAL_READS_DIR = join('data', 'viral_reads_from_neverresponder')
+Out_PON_PATH = f'data/genomes/{GENOME}/panel_of_normals'
 SORT_SEED = "--random-source <(echo AAAAAAAAAAAAAAAAAAA)"
 
 
@@ -194,7 +194,7 @@ rule subset_bam:
         bam = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).bam,
         roi_bed = rules.project_roi.output[0]
     output:
-        bam_namesorted= 'work_snake/bam_subset/{batch}_{phenotype}.bam'
+        bam_namesorted = 'work_snake/bam_subset/{batch}_{phenotype}.bam'
     shell:
         'sambamba slice {input.bam} -L {input.roi_bed}'
         ' | samtools sort -n -Obam'
