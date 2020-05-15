@@ -221,7 +221,7 @@ rule remap_reads:
         bam = 'work_snake/bam_remap/{batch}_{phenotype}.bam',
     params:
         bwt_index = hpc.get_ref_file(GENOME, 'bwa', must_exist=False),
-        sample = lambda wc: batch_by_name[wc.batch].name,
+        sample = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).rgid,
     shell:
         "test -e {params.bwt_index}.bwt &&"
         " bwa mem -R '@RG\\tID:{params.sample}\\tSM:{params.sample}' {params.bwt_index} {input.fq1} {input.fq2} "

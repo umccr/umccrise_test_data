@@ -18,7 +18,7 @@ run = BcbioProject(BCBIO_DIR, include_samples=include_names)
 included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
-bcbio_copy_path = config.get('out', 'data/bcbio_test_project_seqcII')
+bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_work_dir = join(bcbio_copy_path, 'work')
 bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
@@ -230,7 +230,7 @@ rule remap_reads:
         bam = 'work_snake/bam_remap/{batch}_{phenotype}.bam',
     params:
         bwt_index = hpc.get_ref_file(GENOME, 'bwa', must_exist=False),
-        sample = lambda wc: batch_by_name[wc.batch].name,
+        sample = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).rgid,
     shell:
         "test -e {params.bwt_index}.bwt &&"
         " bwa mem -R '@RG\\tID:{params.sample}\\tSM:{params.sample}' {params.bwt_index} {input.fq1} {input.fq2} "
