@@ -10,7 +10,7 @@ try:
     from ngs_utils.utils import is_az, is_local, is_travis
     from ngs_utils.file_utils import safe_mkdir
     from ngs_utils.call_process import run_simple
-    from hpc_utils import hpc
+    from reference_data import api as refdata
 except ImportError as e:
     traceback.print_exc()
     sys.stderr.write('\nUmccrise is not installed properly. Refer to the README.md for installation\n')

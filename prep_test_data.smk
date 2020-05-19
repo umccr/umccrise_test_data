@@ -4,8 +4,8 @@ from os.path import join, abspath, relpath, basename, isfile, dirname
 from ngs_utils.bcbio import BcbioProject
 from ngs_utils.file_utils import splitext_plus, safe_mkdir
 from ngs_utils.reference_data import get_key_genes_bed, get_predispose_genes_bed
-from hpc_utils import hpc
 from ngs_utils import logger as log
+from reference_data import api as refdata
 
 
 shell.executable(os.environ.get('SHELL', 'bash'))
@@ -154,7 +154,7 @@ rule conpair_roi:
     input:
         bed = 'data/conpair_markers/GRCh37.bed' if GENOME == 'GRCh37' else \
         'data/conpair_markers/hg38.liftover.bed',
-        fai = hpc.get_ref_file(GENOME, key='fa') + '.fai'
+        fai = refdata.get_ref_file(GENOME, key='fa') + '.fai'
     output:
         'work_snake/conpair_roi.bed'
     shell:
@@ -166,7 +166,7 @@ rule project_roi:
     input:
         beds = expand(rules.batch_roi.output[0], batch=batch_by_name.keys()) +
                [rules.conpair_roi.output[0]],
-        fai = hpc.get_ref_file(GENOME, key='fa') + '.fai'
+        fai = refdata.get_ref_file(GENOME, key='fa') + '.fai'
     output:
         'work_snake/roi.bed'
     shell:
@@ -179,7 +179,7 @@ rule project_roi:
 rule project_somatic_roi:
     input:
         beds = expand(rules.somatic_roi.output[0], batch=batch_by_name.keys()),
-        fai = hpc.get_ref_file(GENOME, key='fa') + '.fai',
+        fai = refdata.get_ref_file(GENOME, key='fa') + '.fai',
     output:
         'work_snake/somatic_roi.bed'
     shell:
@@ -229,7 +229,7 @@ rule remap_reads:
     output:
         bam = 'work_snake/bam_remap/{batch}_{phenotype}.bam',
     params:
-        bwt_index = hpc.get_ref_file(GENOME, 'bwa', must_exist=False),
+        bwt_index = refdata.get_ref_file(GENOME, 'bwa', must_exist=False),
         sample = lambda wc: getattr(batch_by_name[wc.batch], wc.phenotype).rgid,
     shell:
         "test -e {params.bwt_index}.bwt &&"
@@ -395,7 +395,7 @@ rule populate_batch:
 #### Reference data ####
 rule prep_gnomad:
     input:
-        vcf = hpc.get_ref_file(GENOME, 'gnomad'),
+        vcf = refdata.get_ref_file(GENOME, 'gnomad'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz'
@@ -405,7 +405,7 @@ rule prep_gnomad:
 
 rule prep_purple_gc:
     input:
-        hpc.get_ref_file(GENOME, 'purple_gc')
+        refdata.get_ref_file(GENOME, 'purple_gc')
     output:
         f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp'
     shell:
@@ -413,7 +413,7 @@ rule prep_purple_gc:
 
 rule prep_germline_het:
     input:
-        vcf = hpc.get_ref_file(GENOME, 'purple_het'),
+        vcf = refdata.get_ref_file(GENOME, 'purple_het'),
         roi_bed = rules.project_roi.output[0]
     output:
         f'data/genomes/{GENOME}/hmf/GermlineHetPon.hg19.vcf.gz'
@@ -423,7 +423,7 @@ rule prep_germline_het:
 
 rule prep_hotspots:
     input:
-        file = hpc.get_ref_file(GENOME, 'hotspots')
+        file = refdata.get_ref_file(GENOME, 'hotspots')
     output:
         f'data/genomes/{GENOME}/hotspots/merged.vcf.gz'
     shell:
@@ -431,7 +431,7 @@ rule prep_hotspots:
 
 rule prep_giab_conf:
     input:
-        bed = hpc.get_ref_file(GENOME, 'hmf_giab_conf'),
+        bed = refdata.get_ref_file(GENOME, 'hmf_giab_conf'),
         roi_bed = rules.project_roi.output[0]
     output:
         f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
@@ -443,7 +443,7 @@ rule prep_giab_conf:
 #### Panel of normals ####
 rule prep_pon_snps_vcf:
     input:
-        pon_vcf = join(hpc.get_ref_file(GENOME, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
+        pon_vcf = join(refdata.get_ref_file(GENOME, 'panel_of_normals_dir'), 'panel_of_normals.snps.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz')
@@ -453,7 +453,7 @@ rule prep_pon_snps_vcf:
 
 rule prep_pon_indels_vcf:
     input:
-        pon_vcf = join(hpc.get_ref_file(GENOME, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
+        pon_vcf = join(refdata.get_ref_file(GENOME, 'panel_of_normals_dir'), 'panel_of_normals.indels.vcf.gz'),
         somatic_roi = rules.project_somatic_roi.output[0]
     output:
         vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz')
