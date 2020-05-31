@@ -86,11 +86,11 @@ rule somatic_roi:
 rule downsample_germline:
     input:
         vcf = lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-germline-ensemble-annotated.vcf.gz'),
-        predispose_genes_bed = get_predispose_genes_bed(GENOME, coding_only=True),
+        predispose_genes_bed = get_predispose_genes_bed(GENOME, coding_only=False),
     output:
         vcf = 'work_snake/germline/{batch}-germline-ensemble-predispose-genes.vcf'
     shell:
-        'bcftools view -T <(sort -R {SORT_SEED} {input.predispose_genes_bed} | head -n500) {input.vcf}'
+        'bcftools view -T <(sort -R {SORT_SEED} {input.predispose_genes_bed} | head -n10) {input.vcf}'
         ' > {output.vcf}'
 
 # rule downsample_germline_random100:
