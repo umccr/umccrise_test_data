@@ -56,11 +56,11 @@ rule all:
         join(bcbio_copy_date, '.rsynced.done'),
         pon_snps_vcf   = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
-        gnomad          = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz',
-        purple_gc       = f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp',
-        purple_het      = f'data/genomes/{GENOME}/hmf/GermlineHetPon.hg19.vcf.gz',
-        hotspots        = f'data/genomes/{GENOME}/hotspots/merged.vcf.gz',
-        hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
+        # gnomad          = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz',
+        # purple_gc       = f'data/genomes/{GENOME}/hmf/GC_profile.1000bp.cnp',
+        # purple_het      = f'data/genomes/{GENOME}/hmf/GermlineHetPon.hg19.vcf.gz',
+        # hotspots        = f'data/genomes/{GENOME}/hotspots/merged.vcf.gz',
+        # hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
 
 
 ######################################
@@ -83,15 +83,32 @@ rule somatic_roi:
 
 ######################################
 #### GERMLINE ####
+rule peddy_bed:
+    input:
+        peddy_sites = f'data/peddy_GRCH38.sites',
+    output:
+        peddy_bed = 'work_snake/germline/peddy.bed'
+    shell:
+        """cat {input} | tr ':' '\t' | awk '{{ print "chr" $1 "\t" $2-1 "\t" $2 }}' > {output}"""
+
+rule germline_bed:
+    input:
+        peddy_bed = 'work_snake/germline/peddy.bed',
+        predispose_genes_bed = get_predispose_genes_bed(GENOME, coding_only=False),
+    output:
+        bed = 'work_snake/germline/target.bed',
+    shell:
+        'cat <(cat {input.predispose_genes_bed} | sort -R {SORT_SEED} | head -n10 | cut -f1-3)'
+        ' {input.peddy_bed} | bedtools sort -i stdin | bedtools merge -i stdin > {output.bed}'
+
 rule downsample_germline:
     input:
         vcf = lambda wc: join(run.date_dir, f'{batch_by_name[wc.batch].normal.name}-germline-ensemble-annotated.vcf.gz'),
-        predispose_genes_bed = get_predispose_genes_bed(GENOME, coding_only=False),
+        bed = rules.germline_bed.output
     output:
         vcf = 'work_snake/germline/{batch}-germline-ensemble-predispose-genes.vcf'
     shell:
-        'bcftools view -T <(sort -R {SORT_SEED} {input.predispose_genes_bed} | head -n10) {input.vcf}'
-        ' > {output.vcf}'
+        'bcftools view -T {input.bed} {input.vcf} > {output.vcf}'
 
 # rule downsample_germline_random100:
 #     input:
