@@ -38,7 +38,8 @@ class Test_umccrise(BaseTestCase):
         assert os.system(f'which ' + self.script) == 0, 'Umccrise is not installed. Refer to the README.md for installation'
         BaseTestCase.setUp(self)
 
-    def _run_umccrise(self, input_dirname, parallel=False, docker_wrapper_mode=False, skip_pcgr=False):
+    def _run_umccrise(self, input_dirname=None, parallel=False,
+                      docker_wrapper_mode=False, skip_pcgr=False):
         results_dir = join(self.results_dir, input_dirname)
         input_dir = join(self.data_dir, input_dirname)
         cmdl = f'{self.script} {input_dir} -o {results_dir} -r0'
@@ -51,7 +52,8 @@ class Test_umccrise(BaseTestCase):
         self._run_cmd(cmdl, input_dir, results_dir)
         return results_dir
 
-    def _check_file(self, diff_failed, path, ignore_matching_lines=None, wrapper=None, check_diff=True):
+    def _check_file(self, diff_failed, path, ignore_matching_lines=None,
+                    wrapper=None, check_diff=True):
         try:
             self._check_file_throws(path, ignore_matching_lines=ignore_matching_lines, wrapper=wrapper, check_diff=check_diff)
         except subprocess.CalledProcessError as e:
@@ -64,8 +66,9 @@ class Test_umccrise(BaseTestCase):
 
     @attr('bcbio')
     def test_bcbio(self, docker_wrapper_mode=False, skip_pcgr=False):
-        results_dir = self._run_umccrise(input_dirname='bcbio_test_project', parallel=False,
-                                         docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
+        results_dir = self._run_umccrise(
+            input_dirname='bcbio_test_project', parallel=False,
+            docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
 
         failed = False
         # failed = self._check_file(failed, f'{results_dir}/log/{PROJECT}-config/{PROJECT}-template.yaml', check_diff=False)
@@ -93,8 +96,24 @@ class Test_umccrise(BaseTestCase):
 
     @attr('dragen')
     def test_dragen(self, docker_wrapper_mode=False, skip_pcgr=False):
-        results_dir = self._run_umccrise(input_dirname='dragen_test_project', parallel=False,
-                                         docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
+        results_dir = self._run_umccrise(
+            input_dirname='dragen_test_project', parallel=False,
+            docker_wrapper_mode=docker_wrapper_mode, skip_pcgr=skip_pcgr)
+
+    @attr('tsv')
+    def test_tsv(self, docker_wrapper_mode=False, skip_pcgr=False,
+                 parallel=False):
+        results_dir = join(self.results_dir, 'tsv_test_project')
+        input_tsv = join(self.data_dir, 'tsv_test_project', 'input.tsv')
+        cmdl = f'{self.script} {input_tsv} -o {results_dir} -r0'
+        if docker_wrapper_mode:
+            cmdl += f' --genomes {Test_umccrise.test_data_clone}/data/genomes'
+        if parallel:
+            cmdl += ' -j10'
+        if skip_pcgr:
+            cmdl += ' --no-pcgr'
+        self._run_cmd(cmdl, input_tsv, results_dir)
+        return results_dir
 
     # @attr('skip_pcgr')
     # def test_no_pcgr(self):
