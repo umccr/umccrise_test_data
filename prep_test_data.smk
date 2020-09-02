@@ -19,6 +19,7 @@ included_names = [s.name for s in run.samples]
 batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
 bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
+tsv_project_path = config.get('out', 'data/tsv_test_project')
 bcbio_copy_final_dir = join(bcbio_copy_path, 'final')
 bcbio_copy_work_dir = join(bcbio_copy_path, 'work')
 bcbio_copy_date = join(bcbio_copy_final_dir, basename(run.date_dir))
@@ -54,6 +55,7 @@ rule all:
         expand(join(bcbio_copy_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
         join(bcbio_copy_path, '.populated_qc.done') if isfile(mq_list_files) else [],
         join(bcbio_copy_date, '.rsynced.done'),
+        join(tsv_project_path, 'input.tsv'),
         pon_snps_vcf   = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
         pon_indels_vcf = join(Out_PON_PATH, 'panel_of_normals.indels.vcf.gz'),
         # gnomad          = f'data/genomes/{GENOME}/gnomad_genome.vcf.gz',
@@ -61,6 +63,7 @@ rule all:
         # purple_het      = f'data/genomes/{GENOME}/hmf/GermlineHetPon.hg19.vcf.gz',
         # hotspots        = f'data/genomes/{GENOME}/hotspots/merged.vcf.gz',
         # hmf_giab_conf   = f'data/genomes/{GENOME}/hmf/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed.gz'
+
 
 
 ######################################
@@ -407,6 +410,56 @@ rule populate_batch:
 
         shell('touch {output.marker}')
 
+
+######################################
+#### TSV test project ####
+rule populate_tsv_project_batch:
+    input:
+        tumor_bam =  'work_snake/bam_remap/{batch}_tumor.bam',
+        normal_bam = 'work_snake/bam_remap/{batch}_normal.bam',
+        tumor_bai =  'work_snake/bam_remap/{batch}_tumor.bam.bai',
+        normal_bai = 'work_snake/bam_remap/{batch}_normal.bam.bai',
+    output:
+        marker = tsv_project_path + '/.populated_batch_{batch}.done'
+    run:
+        batch = batch_by_name[wildcards.batch]
+        tumor_bam_name = basename(batch.tumor.bam)
+        normal_bam_name = basename(batch.normal.bam)
+        shell(f'cp {input.tumor_bam} {tsv_project_path}/{tumor_bam_name}')
+        shell(f'cp {input.tumor_bai} {tsv_project_path}/{tumor_bam_name}.bai')
+        shell(f'cp {input.normal_bam} {tsv_project_path}/{normal_bam_name}')
+        shell(f'cp {input.normal_bai} {tsv_project_path}/{normal_bam_name}.bai')
+        shell('touch {output.marker}')
+
+rule populate_tsv_projejct:
+    input:
+        expand(join(tsv_project_path, '.populated_batch_{batch}.done'), batch=batch_by_name.keys()),
+    output:
+        input_tsv = join(tsv_project_path, 'input.tsv')
+    run:
+        with open(output.input_tsv, 'w') as f:
+            f.write('\t'.join(['sample', 'wgs', 'normal', 'exome', 'exome_normal',
+                               'rna', 'rna_bcbio', 'rna_sample']) + '\n')
+            for batch in batch_by_name.values():
+                tumor_bam_name = basename(batch.tumor.bam)
+                normal_bam_name = basename(batch.normal.bam)
+                fields = [
+                    f'{tumor_bam_name}',
+                    f'{normal_bam_name}',
+                    '.',
+                    '.',
+                ]
+                # if patients.get(apgi_id, f'Reprocessed_RNA'):
+                #     rna_bam = patients.find_rna_bams(apgi_id)[0]
+                #     fields.extend([
+                #         rna_bam,
+                #         join(Patients.reprocessed_base_dir_raijin,
+                #              patients.get(apgi_id, f'Reprocessed_RNA')),
+                #         basename(rna_bam).replace('-ready.bam', ''),
+                #     ])
+                # else:
+                fields.extend(['.', '.', '.'])
+                f.write('\t'.join([batch.name] + fields) + '\n')
 
 ######################################
 #### Reference data ####
