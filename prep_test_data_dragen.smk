@@ -14,7 +14,7 @@ GENOME = 'hg38'
 DRAGEN_DIR = config.get('dragen_dir', '/g/data/gx8/extras/vlad/synced/umccr/umccrise_test_data/running_dragen/P025')
 run = DragenProject(DRAGEN_DIR)
 included_names = [s.name for s in run.samples]
-batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
+batch_by_name = {b.tumors[0].name: b for b in run.batch_by_name.values() if not b.is_germline()}
 assert included_names
 
 PROJECT_NEW_PATH = config.get('out', 'data/dragen_test_project')
@@ -45,7 +45,7 @@ rule all:
         expand(join(PROJECT_NEW_PATH, '{batch}_tumor.bam'), batch=batch_by_name.keys()),
         expand(join(PROJECT_NEW_PATH, '{batch}_tumor.bam.bai'), batch=batch_by_name.keys()),
         expand(join(PROJECT_NEW_PATH, '.populated_downsampled_{batch}.done'), batch=batch_by_name.keys()),
-        expand(join(PROJECT_NEW_PATH, '.populated_other_files_{batch}.done')   , batch=batch_by_name.keys()),
+        expand(join(PROJECT_NEW_PATH, '.populated_other_files_{batch}.done'), batch=batch_by_name.keys()),
         'work_snake/roi.bed',
         # reference data:
         # pon_snps_vcf    = join(Out_PON_PATH, 'panel_of_normals.snps.vcf.gz'),
@@ -303,16 +303,16 @@ rule populate_downsampled:
 
         new_project = DragenProject(input_dir=params.project_copy)
         new_batch = new_project.add_batch(batch.name)
-        new_batch.add_tumor(batch.tumor.name)
-        new_batch.add_normal(batch.normal.name)
+        new_batch.add_tumor(batch.tumors[0].name)
+        new_batch.add_normal(batch.normals[0].name)
 
         shell(f'bgzip -c {input.somatic_vcf} > {new_batch.somatic_vcf} && tabix {new_batch.somatic_vcf}')
         shell(f'bgzip -c {input.sv_vcf} > {new_batch.sv_vcf} && tabix {new_batch.sv_vcf}')
 
-        shell(f'cp {input.tumor_bam} {new_batch.tumor.bam}')
-        shell(f'cp {input.normal_bam} {new_batch.normal.bam}')
-        shell(f'cp {input.tumor_bai} {new_batch.tumor.bam}.bai')
-        shell(f'cp {input.normal_bai} {new_batch.normal.bam}.bai')
+        shell(f'cp {input.tumor_bam} {new_batch.tumors[0].bam}')
+        shell(f'cp {input.normal_bam} {new_batch.normals[0].bam}')
+        shell(f'cp {input.tumor_bai} {new_batch.tumors[0].bam}.bai')
+        shell(f'cp {input.normal_bai} {new_batch.normals[0].bam}.bai')
 
         shell('touch {output.marker}')
 

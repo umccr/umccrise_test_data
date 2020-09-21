@@ -16,7 +16,7 @@ BCBIO_DIR = config.get('final', '/g/data/gx8/projects/Saveliev_SEQCII/bcbio/samp
 include_names = ['T_SRR7890936_50pc']
 run = BcbioProject(BCBIO_DIR, include_samples=include_names)
 included_names = [s.name for s in run.samples]
-batch_by_name = {b.tumor.name: b for b in run.batch_by_name.values() if not b.is_germline()}
+batch_by_name = {b.tumors[0].name: b for b in run.batch_by_name.values() if not b.is_germline()}
 
 bcbio_copy_path = config.get('out', 'data/bcbio_test_project')
 tsv_project_path = config.get('out', 'data/tsv_test_project')
@@ -134,7 +134,7 @@ rule germline_roi:
 #### MANTA ####
 rule downsample_manta:
     input:
-        lambda wc: join(batch_by_name[wc.batch].tumor.dirpath, f'{batch_by_name[wc.batch].name}-manta.vcf.gz')
+        lambda wc: join(batch_by_name[wc.batch].tumors[0].dirpath, f'{batch_by_name[wc.batch].name}-manta.vcf.gz')
     output:
         'work_snake/sv/{batch}-manta.vcf'
     shell:
@@ -393,16 +393,20 @@ rule populate_batch:
         somatic_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.name}-ensemble-annotated.vcf.gz')
         shell(f'bcftools sort {input.somatic_vcf} | bgzip -c > {somatic_vcf} && tabix {somatic_vcf}')
 
-        germline_vcf = join(bcbio_copy_path, 'final', basename(run.date_dir), f'{batch.normal.name}-germline-ensemble-annotated.vcf.gz')
+        germline_vcf = join(bcbio_copy_path, 'final',
+                            basename(run.date_dir),
+                            f'{batch.normals[0].name}-germline-ensemble-annotated.vcf.gz')
         shell(f'bcftools sort {input.germline_vcf} | bgzip -c > {germline_vcf} && tabix {germline_vcf}')
 
-        manta_vcf = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath), f'{batch.name}-manta.vcf.gz')
+        manta_vcf = join(bcbio_copy_path, 'final',
+                         basename(batch.tumors[0].dirpath),
+                         f'{batch.name}-manta.vcf.gz')
         shell(f'bcftools sort {input.manta_vcf} | bgzip -c > {manta_vcf} && tabix {manta_vcf}')
 
-        tumor_bam_name = basename(batch.tumor.bam)
-        normal_bam_name = basename(batch.normal.bam)
-        tumor_dir = join(bcbio_copy_path, 'final', basename(batch.tumor.dirpath))
-        normal_dir = join(bcbio_copy_path, 'final', basename(batch.normal.dirpath))
+        tumor_bam_name = basename(batch.tumors[0].bam)
+        normal_bam_name = basename(batch.normals[0].bam)
+        tumor_dir = join(bcbio_copy_path, 'final', basename(batch.tumors[0].dirpath))
+        normal_dir = join(bcbio_copy_path, 'final', basename(batch.normals[0].dirpath))
         shell(f'cp {input.tumor_bam} {tumor_dir}/{tumor_bam_name}')
         shell(f'cp {input.tumor_bai} {tumor_dir}/{tumor_bam_name}.bai')
         shell(f'cp {input.normal_bam} {normal_dir}/{normal_bam_name}')
@@ -423,8 +427,8 @@ rule populate_tsv_project_batch:
         marker = tsv_project_path + '/.populated_batch_{batch}.done'
     run:
         batch = batch_by_name[wildcards.batch]
-        tumor_bam_name = basename(batch.tumor.bam)
-        normal_bam_name = basename(batch.normal.bam)
+        tumor_bam_name = basename(batch.tumors[0].bam)
+        normal_bam_name = basename(batch.normals[0].bam)
         shell(f'cp {input.tumor_bam} {tsv_project_path}/{tumor_bam_name}')
         shell(f'cp {input.tumor_bai} {tsv_project_path}/{tumor_bam_name}.bai')
         shell(f'cp {input.normal_bam} {tsv_project_path}/{normal_bam_name}')
@@ -441,8 +445,8 @@ rule populate_tsv_projejct:
             f.write('\t'.join(['sample', 'wgs', 'normal', 'exome', 'exome_normal',
                                'rna', 'rna_bcbio', 'rna_sample']) + '\n')
             for batch in batch_by_name.values():
-                tumor_bam_name = basename(batch.tumor.bam)
-                normal_bam_name = basename(batch.normal.bam)
+                tumor_bam_name = basename(batch.tumors[0].bam)
+                normal_bam_name = basename(batch.normals[0].bam)
                 fields = [
                     f'{tumor_bam_name}',
                     f'{normal_bam_name}',
