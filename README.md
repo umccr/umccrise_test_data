@@ -1,6 +1,16 @@
+&nbsp;
+<p align='center'>
+New DRAGEN downsampled data for SEQC-II added. Other datasets to be reworked and refreshed at a later date.
+</p>
+
+<p align='center'>
+See <a href='dragen_downsample_process.md'>dragen_downsample_process.md</a> for the process used.
+</p>
+
+---
+
 Test data for umccrise
 ----------------------------------------------------------------------------
-
 ```
 normal: CCR180074_WH18B001P017
 batch: 2016.249.18.WH.P017_1 - tumor: CCR180074_WH18B001P017
