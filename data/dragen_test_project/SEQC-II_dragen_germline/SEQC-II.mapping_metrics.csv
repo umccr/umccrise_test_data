@@ -1,0 +1,109 @@
+MAPPING/ALIGNING SUMMARY,,Total input reads,1100000000,100.00
+MAPPING/ALIGNING SUMMARY,,Number of duplicate marked reads,126697688,11.52
+MAPPING/ALIGNING SUMMARY,,Number of duplicate marked and mate reads removed,NA
+MAPPING/ALIGNING SUMMARY,,Number of unique reads (excl. duplicate marked reads),973302312,88.48
+MAPPING/ALIGNING SUMMARY,,Reads with mate sequenced,1100000000,100.00
+MAPPING/ALIGNING SUMMARY,,Reads without mate sequenced,0,0.00
+MAPPING/ALIGNING SUMMARY,,QC-failed reads,0,0.00
+MAPPING/ALIGNING SUMMARY,,Mapped reads,1098719069,99.88
+MAPPING/ALIGNING SUMMARY,,Mapped reads adjusted for filtered mapping,1098719069,99.88
+MAPPING/ALIGNING SUMMARY,,Mapped reads R1,549897994,99.98
+MAPPING/ALIGNING SUMMARY,,Mapped reads R2,548821075,99.79
+MAPPING/ALIGNING SUMMARY,,Number of unique & mapped reads (excl. duplicate marked reads),972021381,88.37
+MAPPING/ALIGNING SUMMARY,,Unmapped reads,1280931,0.12
+MAPPING/ALIGNING SUMMARY,,Unmapped reads adjusted for filtered mapping,1280931,0.12
+MAPPING/ALIGNING SUMMARY,,Adjustment of reads matching non-reference decoys,0,0.00
+MAPPING/ALIGNING SUMMARY,,Singleton reads (itself mapped; mate unmapped),1219379,0.11
+MAPPING/ALIGNING SUMMARY,,Paired reads (itself & mate mapped),1097499690,99.77
+MAPPING/ALIGNING SUMMARY,,Properly paired reads,1082046882,98.37
+MAPPING/ALIGNING SUMMARY,,Not properly paired reads (discordant),15452808,1.40
+MAPPING/ALIGNING SUMMARY,,Paired reads mapped to different chromosomes,10359816,0.94
+MAPPING/ALIGNING SUMMARY,,Paired reads mapped to different chromosomes (MAPQ>=10),4066771,0.37
+MAPPING/ALIGNING SUMMARY,,Reads with MAPQ [40:inf),1009161347,91.74
+MAPPING/ALIGNING SUMMARY,,Reads with MAPQ [30:40),3826531,0.35
+MAPPING/ALIGNING SUMMARY,,Reads with MAPQ [20:30),8460420,0.77
+MAPPING/ALIGNING SUMMARY,,Reads with MAPQ [10:20),12627420,1.15
+MAPPING/ALIGNING SUMMARY,,Reads with MAPQ [ 0:10),64643351,5.88
+MAPPING/ALIGNING SUMMARY,,Reads with MAPQ NA (Unmapped reads),1280931,0.12
+MAPPING/ALIGNING SUMMARY,,Reads with indel R1,14567106,2.65
+MAPPING/ALIGNING SUMMARY,,Reads with indel R2,13572035,2.47
+MAPPING/ALIGNING SUMMARY,,Total bases,165000000000
+MAPPING/ALIGNING SUMMARY,,Total bases R1,82500000000
+MAPPING/ALIGNING SUMMARY,,Total bases R2,82500000000
+MAPPING/ALIGNING SUMMARY,,Mapped bases R1,82484699100
+MAPPING/ALIGNING SUMMARY,,Mapped bases R2,82323161250
+MAPPING/ALIGNING SUMMARY,,Soft-clipped bases R1,854164488,1.04
+MAPPING/ALIGNING SUMMARY,,Soft-clipped bases R2,1716584283,2.09
+MAPPING/ALIGNING SUMMARY,,Mismatched bases R1,346720973,0.42
+MAPPING/ALIGNING SUMMARY,,Mismatched bases R2,671883010,0.82
+MAPPING/ALIGNING SUMMARY,,Mismatched bases R1 (excl. indels),296750859,0.36
+MAPPING/ALIGNING SUMMARY,,Mismatched bases R2 (excl. indels),622404979,0.76
+MAPPING/ALIGNING SUMMARY,,Q30 bases,147576651866,89.44
+MAPPING/ALIGNING SUMMARY,,Q30 bases R1,77087948549,93.44
+MAPPING/ALIGNING SUMMARY,,Q30 bases R2,70488703317,85.44
+MAPPING/ALIGNING SUMMARY,,Q30 bases (excl. dups & clipped bases),133513822787
+MAPPING/ALIGNING SUMMARY,,Total alignments,1127037455
+MAPPING/ALIGNING SUMMARY,,Secondary alignments,0
+MAPPING/ALIGNING SUMMARY,,Supplementary (chimeric) alignments,28318386
+MAPPING/ALIGNING SUMMARY,,Estimated read length,150.00
+MAPPING/ALIGNING SUMMARY,,Bases in reference genome,3217346917
+MAPPING/ALIGNING SUMMARY,,Bases in target bed [% of genome],NA
+MAPPING/ALIGNING SUMMARY,,Average sequenced coverage over genome,51.28
+MAPPING/ALIGNING SUMMARY,,Insert length: mean,383.00
+MAPPING/ALIGNING SUMMARY,,Insert length: median,377.00
+MAPPING/ALIGNING SUMMARY,,Insert length: standard deviation,82.84
+MAPPING/ALIGNING SUMMARY,,Provided sex chromosome ploidy,NA
+MAPPING/ALIGNING SUMMARY,,Estimated sample contamination,NA
+MAPPING/ALIGNING SUMMARY,,DRAGEN mapping rate [mil. reads/second],1.87
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Total reads in RG,1100000000,100.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Number of duplicate marked reads,126697688,11.52
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Number of duplicate marked and mate reads removed,NA
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Number of unique reads (excl. duplicate marked reads),973302312,88.48
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with mate sequenced,1100000000,100.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads without mate sequenced,0,0.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,QC-failed reads,0,0.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mapped reads,1098719069,99.88
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mapped reads adjusted for filtered mapping,1098719069,99.88
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mapped reads R1,549897994,99.98
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mapped reads R2,548821075,99.79
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Number of unique & mapped reads (excl. duplicate marked reads),972021381,88.37
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Unmapped reads,1280931,0.12
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Unmapped reads adjusted for filtered mapping,1280931,0.12
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Adjustment of reads matching non-reference decoys,0,0.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Singleton reads (itself mapped; mate unmapped),1219379,0.11
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Paired reads (itself & mate mapped),1097499690,99.77
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Properly paired reads,1082046882,98.37
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Not properly paired reads (discordant),15452808,1.40
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Paired reads mapped to different chromosomes,10359816,0.94
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Paired reads mapped to different chromosomes (MAPQ>=10),4066771,0.37
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with MAPQ [40:inf),1009161347,91.74
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with MAPQ [30:40),3826531,0.35
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with MAPQ [20:30),8460420,0.77
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with MAPQ [10:20),12627420,1.15
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with MAPQ [ 0:10),64643351,5.88
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with MAPQ NA (Unmapped reads),1280931,0.12
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with indel R1,14567106,2.65
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Reads with indel R2,13572035,2.47
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Total bases,165000000000
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Total bases R1,82500000000
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Total bases R2,82500000000
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mapped bases R1,82484699100
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mapped bases R2,82323161250
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Soft-clipped bases R1,854164488,1.04
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Soft-clipped bases R2,1716584283,2.09
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mismatched bases R1,346720973,0.42
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mismatched bases R2,671883010,0.82
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mismatched bases R1 (excl. indels),296750859,0.36
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Mismatched bases R2 (excl. indels),622404979,0.76
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Q30 bases,147576651866,89.44
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Q30 bases R1,77087948549,93.44
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Q30 bases R2,70488703317,85.44
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Q30 bases (excl. dups & clipped bases),133513822787
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Total alignments,1127037455
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Secondary alignments,0
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Supplementary (chimeric) alignments,28318386
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Estimated read length,150.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Average sequenced coverage over genome,51.28
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Insert length: mean,383.15
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Insert length: median,377.00
+MAPPING/ALIGNING PER RG,SEQC-II_normal_UnknownLibrary,Insert length: standard deviation,82.85
